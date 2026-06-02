@@ -3,55 +3,87 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Radio de Voladura - Consulta GPS</title>
+  <title>Piloto - Radio de Voladura UNACEM</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIINfQPDLA7E/l6hI4q7fEFnD3+vz7fZOgI=" crossorigin=""/>
 </head>
-<body data-mode="viewer">
-<header>
-  <div>
-    <h1>Radio de Voladura</h1>
-    <p>Activa tu GPS para saber si estás dentro o fuera del radio.</p>
-  </div>
-  <span class="badge">Consulta</span>
-</header>
-
-<main>
-  <section class="result-card">
-    <h2>Resultado</h2>
-    <div id="resultado" class="resultado neutral">Presiona “Activar mi GPS”.</div>
-    <p id="detalle">Se calculará tu distancia aproximada al punto de voladura.</p>
-    <button id="btnGPS" class="primary full">Activar mi GPS</button>
-  </section>
-
-  <section class="panel info">
-    <h2>Datos de la voladura</h2>
-    <div class="cards">
-      <div><small>Voladura</small><strong id="vNombre">-</strong></div>
-      <div><small>Fecha / Hora</small><strong id="vFechaHora">-</strong></div>
-      <div><small>Radio de influencia</small><strong id="vRadio">-</strong></div>
+<body>
+  <header>
+    <div>
+      <h1>Radio de Voladura - Piloto</h1>
+      <p>Consulta rápida por GPS para verificar si estás dentro del radio de influencia.</p>
     </div>
-  </section>
+    <span class="badge">MVP</span>
+  </header>
 
-  <section class="map-section">
-    <h2>Mapa GPS</h2>
-    <div id="map"></div>
-    <div class="legend">
-      <span><b class="red"></b> Radio de influencia</span>
-      <span><b class="blue"></b> Mi ubicación</span>
-    </div>
-  </section>
+  <main>
+    <section class="panel">
+      <h2>1. Datos de la voladura</h2>
+      <div class="grid">
+        <label>Este UTM X
+          <input id="utmX" type="number" step="0.001" value="292925.533">
+        </label>
+        <label>Norte UTM Y
+          <input id="utmY" type="number" step="0.001" value="8651196.600">
+        </label>
+        <label>Zona UTM
+          <input id="zone" type="number" value="18">
+        </label>
+        <label>Hemisferio
+          <select id="hem">
+            <option value="S" selected>Sur</option>
+            <option value="N">Norte</option>
+          </select>
+        </label>
+        <label>Radio equipos (m)
+          <input id="rEquipos" type="number" value="300">
+        </label>
+        <label>Radio personal (m)
+          <input id="rPersonal" type="number" value="500">
+        </label>
+        <label>Fecha
+          <input id="fecha" type="date">
+        </label>
+        <label>Hora
+          <input id="hora" type="time" value="12:15">
+        </label>
+      </div>
+      <button id="btnDibujar">Actualizar radios</button>
+      <button id="btnGPS" class="primary">Activar mi GPS</button>
+      <p class="hint">El GPS solo funcionará si la página está publicada en HTTPS, por ejemplo GitHub Pages o Netlify.</p>
+    </section>
 
-  <section class="panel">
-    <h2>Plano de referencia</h2>
-    <div id="planContainer" class="plan-container"></div>
-  </section>
+    <section class="status" id="statusBox">
+      <h2>Resultado</h2>
+      <div id="resultado" class="resultado neutral">Aún no se activó el GPS.</div>
+      <p id="detalle">Primero actualiza los radios y luego activa tu ubicación.</p>
+    </section>
 
-  <section class="panel small">
-    <p><strong>Nota:</strong> Piloto referencial. Para uso operativo debe validarse con Topografía/GIS y el procedimiento oficial de voladura.</p>
-  </section>
-</main>
+    <section class="map-section">
+      <div id="map"></div>
+    </section>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="script.js"></script>
+    <section class="panel">
+      <h2>2. Plano de referencia</h2>
+      <p>Plano referencial cargado para comparar visualmente los radios de evacuación y equipos.</p>
+      <img src="plano-voladura.png" alt="Plano de evacuación por voladura" class="plano" />
+    </section>
+
+    <section class="panel small">
+      <h2>Uso recomendado</h2>
+      <ol>
+        <li>El responsable ingresa las coordenadas UTM del punto de voladura.</li>
+        <li>Define radio de equipos y personal.</li>
+        <li>Comparte el enlace o QR.</li>
+        <li>El usuario activa GPS y recibe el estado: seguro, alerta o evacuar.</li>
+      </ol>
+      <p><strong>Nota:</strong> Este piloto es referencial. Para operación real debe validarse con Topografía/GIS y con el procedimiento de voladura de la empresa.</p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="script.js"></script>
 </body>
 </html>

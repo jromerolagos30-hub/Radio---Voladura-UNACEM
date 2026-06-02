@@ -1,22 +1,20 @@
-# Piloto Radio de Voladura UNACEM - Versión 3
+# Piloto Radio de Voladura UNACEM
 
-## Objetivo
-Un solo enlace público para usuarios. El administrador actualiza la información en `data.json`.
+Esta es una página web estática para validar radios de influencia de voladura con GPS.
 
 ## Archivos
-- index.html: vista pública. Sin campos editables.
-- admin.html: panel para preparar y descargar data.json.
-- data.json: contiene coordenadas, radio, fecha/hora y plano cargado.
+- index.html
 - style.css
 - script.js
+- plano-voladura.png
 
-## Flujo
-1. El administrador abre admin.html.
-2. Actualiza coordenadas, radio, fecha/hora y carga el plano PDF o imagen.
-3. Descarga `data.json`.
-4. En GitHub, sube/reemplaza `data.json`.
-5. Los usuarios siguen entrando al mismo link de index.html y ven lo actualizado.
+## Cómo publicar rápido
+1. Subir todos los archivos a GitHub.
+2. Activar GitHub Pages desde Settings > Pages.
+3. Abrir el enlace HTTPS desde celular.
+4. Activar GPS.
 
-## Resultado usuario
-- Rojo: dentro del radio.
-- Verde: fuera del radio.
+## Importante
+- El GPS solo funciona correctamente en HTTPS.
+- Validar coordenadas UTM, zona y datum con Topografía/GIS antes de uso operativo.
+- Este piloto es referencial y no reemplaza el procedimiento oficial de voladura.
