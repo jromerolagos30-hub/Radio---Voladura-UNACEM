@@ -1,11 +1,8 @@
-# Piloto Radio de Voladura UNACEM - Versión 8
+# Piloto Radio de Voladura UNACEM - Versión 9
 
-Mejora solicitada:
-- Enlace corto como la versión inicial.
-- No incrusta el plano dentro del enlace.
-- Mantiene carga de plano en el administrador.
-- Radio de equipos y radio de personal.
-- Usuario ve rojo o verde con GPS.
-
-Limitación:
-- El plano cargado se guarda en el navegador del administrador. Para compartir el plano a otros equipos con enlace corto, la versión corporativa debe usar SharePoint, Google Drive o backend.
+Cambios:
+- Radio de equipos: contorno verde.
+- Radio de personal: contorno rojo.
+- Enlace generado incluye fecha y hora: ?v=AAAAMMDD-HHMM.
+- El plano cargado se actualiza en la previsualización.
+- Para que todos los usuarios vean el mismo plano con enlace corto, se recomienda usar URL pública del plano.

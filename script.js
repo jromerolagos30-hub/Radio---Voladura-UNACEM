@@ -1,6 +1,6 @@
 let map, blastMarker, userMarker, circleEquipos, circlePersonal, currentData=null, selectedPlanUrl='plano-voladura.png', selectedPlanMime='image/png';
 const DEFAULT_PLAN='plano-voladura.png';
-const DEFAULT_DATA={blastName:'Voladura Atocongo',utmX:292925.533,utmY:8651156.600,zone:18,hemisphere:'S',radiusEquipos:300,radiusPersonal:500,date:'2026-06-02',time:'12:45',planKey:'default',planMime:'image/png'};
+const DEFAULT_DATA={blastName:'Voladura Atocongo',utmX:292925.533,utmY:8651156.600,zone:18,hemisphere:'S',radiusEquipos:300,radiusPersonal:500,date:'2026-06-02',time:'12:45',planKey:'default',planMime:'image/png',planPublicUrl:''};
 
 function enc(obj){return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function dec(str){str=str.replace(/-/g,'+').replace(/_/g,'/');while(str.length%4)str+='=';return JSON.parse(decodeURIComponent(escape(atob(str))))}
@@ -19,11 +19,12 @@ function drawData(d){
  const [lat,lon]=utmToLatLon(Number(d.utmX),Number(d.utmY),Number(d.zone),d.hemisphere),center=L.latLng(lat,lon);
  [blastMarker,circleEquipos,circlePersonal].forEach(l=>{if(l)map.removeLayer(l)});
  blastMarker=L.marker(center).addTo(map).bindPopup('Punto de voladura');
- circleEquipos=L.circle(center,{radius:Number(d.radiusEquipos),color:'red',fillColor:'red',fillOpacity:.16,weight:3}).addTo(map).bindPopup('Radio equipos');
- circlePersonal=L.circle(center,{radius:Number(d.radiusPersonal),color:'#f59e0b',fillColor:'#f59e0b',fillOpacity:.10,weight:3}).addTo(map).bindPopup('Radio personal');
+ circleEquipos=L.circle(center,{radius:Number(d.radiusEquipos),color:'#16a34a',fillColor:'#16a34a',fillOpacity:.10,weight:4}).addTo(map).bindPopup('Radio equipos');
+ circlePersonal=L.circle(center,{radius:Number(d.radiusPersonal),color:'red',fillColor:'red',fillOpacity:.08,weight:4}).addTo(map).bindPopup('Radio personal');
  map.fitBounds(circlePersonal.getBounds(),{padding:[25,25]});setTimeout(()=>map.invalidateSize(),300)
 }
 function getPlanForData(d){
+ if(d.planPublicUrl) return d.planPublicUrl;
  if(!d.planKey || d.planKey==='default') return DEFAULT_PLAN;
  return localStorage.getItem('plan_'+d.planKey) || DEFAULT_PLAN;
 }
@@ -31,25 +32,37 @@ function renderPlan(d, overrideUrl){
  const box=document.getElementById('planContainer');if(!box)return;box.innerHTML='';
  const url=overrideUrl || getPlanForData(d);
  const mime=(d.planMime||selectedPlanMime||'image/png');
- if(mime.includes('pdf')){const f=document.createElement('iframe');f.src=url;box.appendChild(f)}
+ if(mime.includes('pdf') || url.toLowerCase().includes('.pdf')){const f=document.createElement('iframe');f.src=url;box.appendChild(f)}
  else{const img=document.createElement('img');img.src=url;img.alt='Plano de referencia';box.appendChild(img)}
+ const notice=document.getElementById('planNotice');
+ if(notice && !d.planPublicUrl && d.planKey && d.planKey!=='default') notice.textContent='Plano cargado localmente. Otros usuarios verán el plano solo si se usa una URL pública o un almacenamiento corporativo.';
+ else if(notice) notice.textContent='';
 }
 function viewerData(d){document.getElementById('vNombre').textContent=d.blastName||'-';document.getElementById('vFechaHora').textContent=(d.date||'-')+' / '+(d.time||'-');document.getElementById('vRadioEq').textContent=(d.radiusEquipos||'-')+' m';document.getElementById('vRadioPe').textContent=(d.radiusPersonal||'-')+' m'}
 function evaluar(){if(!userMarker||!circlePersonal)return;const dist=userMarker.getLatLng().distanceTo(circlePersonal.getLatLng()),re=Number(currentData.radiusEquipos),rp=Number(currentData.radiusPersonal),res=document.getElementById('resultado'),det=document.getElementById('detalle');res.className='resultado';if(dist<=rp){res.classList.add('peligro');res.textContent=dist<=re?'🔴 DENTRO DEL RADIO DE EQUIPOS':'🔴 DENTRO DEL RADIO DE PERSONAL'}else{res.classList.add('ok');res.textContent='🟢 FUERA DEL RADIO'}det.textContent='Distancia aproximada: '+Math.round(dist)+' m. Radio equipos: '+re+' m. Radio personal: '+rp+' m.'}
 function gps(){if(!navigator.geolocation){alert('Tu navegador no soporta GPS.');return}document.getElementById('resultado').className='resultado neutral';document.getElementById('resultado').textContent='Buscando ubicación GPS...';navigator.geolocation.getCurrentPosition(pos=>{const ll=L.latLng(pos.coords.latitude,pos.coords.longitude);if(userMarker)map.removeLayer(userMarker);userMarker=L.circleMarker(ll,{radius:9,color:'#2563eb',fillColor:'#2563eb',fillOpacity:.95}).addTo(map).bindPopup('Mi ubicación GPS').openPopup();evaluar();map.fitBounds(L.featureGroup([blastMarker,userMarker,circlePersonal]).getBounds(),{padding:[35,35]});document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'})},err=>{document.getElementById('resultado').className='resultado peligro';document.getElementById('resultado').textContent='No se pudo obtener la ubicación.';document.getElementById('detalle').textContent='Revisa permisos de GPS y HTTPS.'},{enableHighAccuracy:true,timeout:15000,maximumAge:0})}
-function adminData(planKey){return{blastName:document.getElementById('blastName').value,utmX:Number(document.getElementById('utmX').value),utmY:Number(document.getElementById('utmY').value),zone:Number(document.getElementById('zone').value),hemisphere:document.getElementById('hemisphere').value,radiusEquipos:Number(document.getElementById('radiusEquipos').value),radiusPersonal:Number(document.getElementById('radiusPersonal').value),date:document.getElementById('date').value,time:document.getElementById('time').value,planKey:planKey||'default',planMime:selectedPlanMime||'image/png'}}
+function adminData(planKey){
+ const planPublicUrl=(document.getElementById('planUrl')?.value||'').trim();
+ return{blastName:document.getElementById('blastName').value,utmX:Number(document.getElementById('utmX').value),utmY:Number(document.getElementById('utmY').value),zone:Number(document.getElementById('zone').value),hemisphere:document.getElementById('hemisphere').value,radiusEquipos:Number(document.getElementById('radiusEquipos').value),radiusPersonal:Number(document.getElementById('radiusPersonal').value),date:document.getElementById('date').value,time:document.getElementById('time').value,planKey:planKey||'default',planMime:selectedPlanMime||'image/png',planPublicUrl}
+}
 function setAdminDefaults(){const d=DEFAULT_DATA;currentData=d;['blastName','utmX','utmY','zone','radiusEquipos','radiusPersonal','date','time'].forEach(id=>document.getElementById(id).value=d[id]);document.getElementById('hemisphere').value=d.hemisphere}
 function preview(){currentData=adminData(currentData?.planKey||'default');drawData(currentData);renderPlan(currentData,selectedPlanUrl)}
 function readAsDataUrl(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=reject;r.readAsDataURL(file)})}
 function compressImage(file,maxW=900,quality=.55){return new Promise((resolve,reject)=>{const img=new Image(),r=new FileReader();r.onload=()=>{img.onload=()=>{const s=Math.min(1,maxW/img.width),w=Math.round(img.width*s),h=Math.round(img.height*s);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',quality))};img.onerror=reject;img.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
 async function handleFile(e){const f=e.target.files[0];if(!f)return;selectedPlanMime=f.type;if(f.type.includes('pdf'))selectedPlanUrl=await readAsDataUrl(f);else selectedPlanUrl=await compressImage(f);preview()}
 function makePlanKey(){return 'v_'+Date.now()}
+function dateRoute(){
+ const f=document.getElementById('date').value || new Date().toISOString().slice(0,10);
+ const h=document.getElementById('time').value || '0000';
+ return f.replaceAll('-','')+'-'+h.replace(':','');
+}
 function generateLink(){
- const planKey = selectedPlanUrl && selectedPlanUrl!==DEFAULT_PLAN ? makePlanKey() : 'default';
- if(planKey!=='default') localStorage.setItem('plan_'+planKey, selectedPlanUrl);
+ const planPublicUrl=(document.getElementById('planUrl')?.value||'').trim();
+ const planKey = planPublicUrl ? 'url' : (selectedPlanUrl && selectedPlanUrl!==DEFAULT_PLAN ? makePlanKey() : 'default');
+ if(planKey!=='default' && planKey!=='url') localStorage.setItem('plan_'+planKey, selectedPlanUrl);
  currentData=adminData(planKey);
- const base=location.href.replace(/admin\.html.*/,'index.html').replace(/\#.*/,'');
- const link=base+'#data='+enc(currentData);
+ const base=location.href.replace(/admin\.html.*/,'index.html').replace(/\?.*/,'').replace(/\#.*/,'');
+ const link=base+'?v='+dateRoute()+'#data='+enc(currentData);
  document.getElementById('publicLink').value=link;
 }
 async function copyLink(){const val=document.getElementById('publicLink').value;if(!val){alert('Primero genera el enlace.');return}try{await navigator.clipboard.writeText(val);alert('Enlace copiado.')}catch(e){alert('Copia manualmente el enlace.')}}

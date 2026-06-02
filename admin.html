@@ -33,28 +33,33 @@
     <label class="file-label">Cargar plano de evacuación JPG/PNG/PDF
       <input id="planFile" type="file" accept="application/pdf,image/png,image/jpeg,image/webp">
     </label>
+    <p class="hint">El plano cargado se verá inmediatamente en la previsualización. Para que otros usuarios también lo vean, usa el campo URL pública del plano.</p>
+
+    <label class="file-label">URL pública del plano (opcional, recomendado para compartir)
+      <input id="planUrl" type="url" placeholder="Ejemplo: enlace público de SharePoint, OneDrive, Drive o imagen web">
+    </label>
 
     <button id="btnPreview">Previsualizar</button>
     <button id="btnGenerate" class="primary">Generar enlace de esta voladura</button>
-    <p class="hint">El enlace generado será corto. El plano se guarda solo en este navegador para previsualización y consulta local.</p>
   </section>
 
   <section class="panel">
     <h2>2. Enlace único para usuarios</h2>
     <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace corto generado para esta voladura"></textarea>
     <button id="btnCopy">Copiar enlace</button>
-    <p class="hint">Comparte este enlace. No contiene imagen incrustada, por eso no aparece el error de enlace largo.</p>
+    <p class="hint">El enlace incluye fecha y hora en la ruta de consulta: <strong>?v=AAAAMMDD-HHMM</strong>.</p>
   </section>
 
   <section class="map-section">
     <h2>Previsualización del radio</h2>
     <div id="map"></div>
-    <p class="hint"><span class="dot red"></span>Radio equipos &nbsp; <span class="dot yellow"></span>Radio personal</p>
+    <p class="hint"><span class="dot green"></span>Radio equipos &nbsp; <span class="dot red"></span>Radio personal</p>
   </section>
 
   <section class="panel">
     <h2>Plano cargado</h2>
     <div id="planContainer" class="plan-container"></div>
+    <p id="planNotice" class="hint"></p>
   </section>
 </main>
 
