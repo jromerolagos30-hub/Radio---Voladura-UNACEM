@@ -4,13 +4,14 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Administrador de Voladura</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body data-mode="admin">
 <header>
   <div>
     <h1>Administrador de Voladura</h1>
-    <p>Usa un plano en la nube para que todos vean la misma versión desde cualquier celular.</p>
+    <p>Registra datos, valida el mapa y genera el enlace para compartir.</p>
   </div>
   <span class="badge">Admin</span>
 </header>
@@ -30,26 +31,24 @@
       <label>Hora<input id="time" type="time" value="12:45"></label>
     </div>
 
-    <label class="file-label">URL pública del plano de evacuación
-      <input id="planUrl" type="url" placeholder="Pegar aquí enlace público de SharePoint / OneDrive / Drive / imagen web">
+    <label class="file-label">Opción A: Cargar plano solo para previsualizar en esta PC/celular
+      <input id="planFile" type="file" accept="application/pdf,image/png,image/jpeg,image/webp">
     </label>
-    <p class="hint">Recomendado: subir el plano a SharePoint/OneDrive/Google Drive y pegar un enlace con permiso de visualización para cualquier persona con el vínculo.</p>
 
-    <button id="btnPreview">Previsualizar</button>
+    <label class="file-label">Opción B: URL pública del plano para que lo vean todos
+      <input id="planUrl" type="url" placeholder="Pega aquí el enlace público de SharePoint / OneDrive / Drive">
+    </label>
+    <p class="hint">Para uso real, usa la opción B. Si usas SharePoint, pega un enlace “cualquier persona con el vínculo puede ver”.</p>
+
+    <button id="btnPreview">Previsualizar radio y plano</button>
     <button id="btnGenerate" class="primary">Generar enlace de esta voladura</button>
-  </section>
-
-  <section class="panel guide">
-    <h2>Cómo obtener la URL del plano</h2>
-    <p><strong>SharePoint / OneDrive:</strong> subir plano → Compartir → “Cualquier persona con el vínculo puede ver” → copiar enlace.</p>
-    <p><strong>Google Drive:</strong> subir plano → Compartir → acceso general “Cualquier persona con el enlace” → copiar enlace.</p>
   </section>
 
   <section class="panel">
     <h2>2. Enlace único para usuarios</h2>
-    <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace corto generado para esta voladura"></textarea>
+    <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado para esta voladura"></textarea>
     <button id="btnCopy">Copiar enlace</button>
-    <p class="hint">El enlace incluye fecha y hora en la consulta: <strong>?v=AAAAMMDD-HHMM</strong>.</p>
+    <p class="hint">El enlace incluye fecha y hora: <strong>?v=AAAAMMDD-HHMM</strong>.</p>
   </section>
 
   <section class="map-section">

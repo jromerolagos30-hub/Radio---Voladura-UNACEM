@@ -1,9 +1,8 @@
-# Piloto Radio de Voladura UNACEM - Versión 10
+# Piloto Radio de Voladura UNACEM - Versión 11
 
-Modelo recomendado:
-- El plano se guarda en SharePoint / OneDrive / Google Drive / ubicación web.
-- El administrador pega la URL pública del plano.
-- El enlace generado sigue siendo corto y cualquier usuario puede ver el plano correcto.
-- Radio equipos: verde.
-- Radio personal: rojo.
-- Enlace incluye fecha y hora: ?v=AAAAMMDD-HHMM.
+Correcciones:
+- Se restauró Leaflet CSS oficial para que el mapa se visualice correctamente.
+- Previsualización del radio funciona con georreferenciación.
+- SharePoint/OneDrive/Drive se muestran como iframe y con botón para abrir plano.
+- Opción A: carga archivo local para previsualización.
+- Opción B: URL pública para que cualquier usuario vea el plano desde cualquier dispositivo.
