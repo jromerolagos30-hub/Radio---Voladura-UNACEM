@@ -1,18 +1,19 @@
 <!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Consulta Radio de Voladura</title>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>UNACEM | Consulta Radio de Voladura</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="style.css"/>
-</head>
+<link rel="stylesheet" href="style.css"/></head>
 <body data-mode="viewer">
-<header><div><h1>Radio de Voladura</h1><p>Activa tu GPS para verificar si estás dentro o fuera del radio.</p></div><span class="badge">Consulta</span></header>
-<main>
-<section class="result-card"><h2>Resultado</h2><div id="resultado" class="resultado neutral">Presiona “Activar mi GPS”.</div><p id="detalle">Se calculará tu distancia al punto de voladura.</p><button id="btnGPS" class="primary full">Activar mi GPS</button></section>
-<section class="panel"><h2>Datos de la voladura</h2><div class="cards"><div><small>Voladura</small><strong id="vNombre">-</strong></div><div><small>Fecha / Hora</small><strong id="vFechaHora">-</strong></div><div><small>Radio equipos</small><strong id="vRadioEq">-</strong></div><div><small>Radio personal</small><strong id="vRadioPe">-</strong></div></div></section>
-<section class="map-section"><h2>Mapa GPS</h2><div id="map"></div><p class="hint"><span class="dot green"></span>Radio equipos &nbsp; <span class="dot red"></span>Radio personal &nbsp; <span class="dot blue"></span>Mi ubicación</p></section>
-<section class="panel small"><p><strong>Nota:</strong> Piloto referencial. Debe validarse con Topografía/GIS y el procedimiento oficial de voladura.</p></section>
-</main>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="script.js"></script>
-</body></html>
+<div class="app-shell">
+<aside class="sidebar"><div class="brand"><div class="mark">U</div><div class="brand-name">UNACEM</div></div><div class="side-title">RADIO DE VOLADURA</div><div class="side-subtitle">Consulta GPS</div><div class="side-footer">Seguridad Operacional</div></aside>
+<main class="content">
+<section class="topbar"><h1>Consulta de Radio de Voladura</h1><p>Activa tu GPS para verificar tu ubicación respecto al radio de influencia.</p></section>
+<section class="grid-main">
+<section class="card result-card"><h2>Resultado</h2><div id="resultado" class="resultado neutral">Presiona “Activar mi GPS”.</div><p id="detalle">Se calculará tu distancia al punto de voladura.</p><button id="btnGPS" class="btn primary full">Activar mi GPS</button></section>
+<section class="card"><h2>Datos de la voladura</h2><div class="cards"><div><small>Voladura</small><strong id="vNombre">-</strong></div><div><small>Fecha / Hora</small><strong id="vFechaHora">-</strong></div><div><small>Radio equipos</small><strong id="vRadioEq">-</strong></div><div><small>Radio personal</small><strong id="vRadioPe">-</strong></div></div></section>
+</section>
+<section class="card map-section"><h2>Mapa GPS</h2><div id="map"></div><p class="legend"><span class="dot green"></span>Radio equipos &nbsp; <span class="dot red"></span>Radio personal &nbsp; <span class="dot blue"></span>Mi ubicación</p></section>
+<section class="card note"><strong>Nota:</strong> Piloto referencial. Debe validarse con Topografía/GIS y el procedimiento oficial de voladura.</section>
+</main></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="script.js"></script></body></html>

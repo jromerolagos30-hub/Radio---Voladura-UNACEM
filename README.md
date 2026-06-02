@@ -1,5 +1,10 @@
-# Piloto Radio de Voladura UNACEM - Versión 13
+# Radio de Voladura UNACEM - Versión Final Branding
 
-Corrección:
-- El enlace de usuario se genera con la ruta completa de index.html.
-- Corrige el error donde solo aparecía ?v=...#data=...
+Basada en versión 13 con identidad visual inspirada en tablero UNACEM:
+- Sidebar negro.
+- Marca UNACEM en rojo.
+- Cabecera negra.
+- Tarjetas blancas.
+- Botones rojos.
+- Radio equipos verde.
+- Radio personal rojo.
