@@ -11,14 +11,16 @@
 <label>Norte UTM Y<input id="utmY" type="number" step="0.001" value="8651156.600"></label>
 <label>Zona UTM<input id="zone" type="number" value="18"></label>
 <label>Hemisferio<select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select></label>
-<label>Radio de influencia (m)<input id="radiusMeters" type="number" value="600"></label>
+<label>Radio equipos (m)<input id="radiusEquipos" type="number" value="300"></label>
+<label>Radio personal (m)<input id="radiusPersonal" type="number" value="500"></label>
 <label>Fecha<input id="date" type="date"></label>
 <label>Hora<input id="time" type="time" value="12:45"></label>
 </div>
-<label class="file-label">Cargar plano de evacuación como imagen JPG/PNG<input id="planFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
-<p class="hint">Recomendado: usar captura o imagen del plano. El sistema la comprime y la incorpora al enlace generado.</p>
+<label class="file-label">URL del plano de evacuación o imagen
+<input id="planUrl" type="url" placeholder="Pega aquí el enlace del plano o imagen"></label>
+<p class="hint">Recomendado: subir el plano a SharePoint/OneDrive/Drive con enlace de visualización y pegar aquí el link. Así el enlace de voladura no se hace demasiado largo.</p>
 <button id="btnPreview">Previsualizar</button><button id="btnLink" class="primary">Generar enlace de esta voladura</button></section>
-<section class="panel"><h2>2. Enlace para compartir</h2><textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado para esta voladura"></textarea><button id="btnCopy">Copiar enlace</button><p class="hint">Este enlace contiene coordenadas, radio y plano cargado. No requiere subir JSON a GitHub.</p></section>
-<section class="map-section"><h2>Previsualización del radio</h2><div id="map"></div></section>
+<section class="panel"><h2>2. Enlace para compartir</h2><textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado para esta voladura"></textarea><button id="btnCopy">Copiar enlace</button><p class="hint">Este enlace contiene coordenadas y radios. El plano se carga desde la URL indicada.</p></section>
+<section class="map-section"><h2>Previsualización del radio</h2><div id="map"></div><p class="hint"><span class="dot red"></span>Radio equipos &nbsp; <span class="dot green"></span>Radio personal</p></section>
 <section class="panel"><h2>Plano cargado</h2><div id="planContainer" class="plan-container"></div></section>
 </main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="script.js"></script></body></html>

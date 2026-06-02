@@ -1,10 +1,7 @@
-# Piloto Radio de Voladura UNACEM - Versión 4
+# Piloto Radio de Voladura UNACEM - Versión 5
 
-Ya no usa data.json. El administrador genera un enlace diferente por cada proceso de voladura.
-
-Flujo:
-1. Abrir admin.html.
-2. Ingresar coordenadas, radio, fecha, hora y cargar imagen del plano.
-3. Presionar “Generar enlace de esta voladura”.
-4. Copiar y compartir el enlace.
-5. El usuario abre el enlace, activa GPS y ve rojo o verde.
+Mejoras:
+- No incrusta imagen en el enlace, por eso evita el problema de enlace muy largo.
+- El administrador pega la URL pública del plano.
+- Incluye radio de equipos y radio de personal.
+- El usuario ve rojo si está dentro del radio de personal/equipos y verde si está fuera.
