@@ -1,10 +1,5 @@
-# Piloto Radio de Voladura UNACEM - Versión 12
+# Piloto Radio de Voladura UNACEM - Versión 13
 
-Basado en la versión 9, retirando completamente el plano de evacuación de administrador y usuario.
-
-Mantiene:
-- Georreferenciación.
-- Radio de equipos verde.
-- Radio de personal rojo.
-- GPS.
-- Enlace con fecha/hora.
+Corrección:
+- El enlace de usuario se genera con la ruta completa de index.html.
+- Corrige el error donde solo aparecía ?v=...#data=...

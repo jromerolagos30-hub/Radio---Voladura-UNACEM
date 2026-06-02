@@ -6,7 +6,7 @@ h1{font-size:22px;margin:0 0 4px}h2{font-size:18px;margin:0 0 12px}p{line-height
 .panel,.result-card,.map-section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 10px 20px rgba(0,0,0,.18);overflow:hidden}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}label{font-size:13px;color:var(--muted)}
 input,select,textarea{width:100%;margin-top:5px;padding:11px;border-radius:10px;border:1px solid var(--line);background:#020617;color:var(--text);font-size:16px}
-textarea{height:95px}button{margin-top:12px;margin-right:8px;border:0;border-radius:12px;padding:12px 14px;background:#475569;color:white;font-weight:bold;font-size:15px}
+textarea{height:115px}button{margin-top:12px;margin-right:8px;border:0;border-radius:12px;padding:12px 14px;background:#475569;color:white;font-weight:bold;font-size:15px}
 button.primary{background:var(--blue)}button.full{width:100%;margin-right:0}.hint{font-size:13px;color:var(--muted)}
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:middle}.red{background:red}.green{background:var(--green)}.blue{background:var(--blue)}
 #map{height:60vh;min-height:430px;width:100%;border-radius:14px;border:1px solid var(--line);background:#0b1220;position:relative;overflow:hidden}
