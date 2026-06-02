@@ -7,54 +7,51 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-mode="viewer">
-  <header>
-    <div>
-      <h1>Radio de Voladura</h1>
-      <p>Consulta con GPS si te encuentras dentro o fuera del radio de influencia.</p>
+<header>
+  <div>
+    <h1>Radio de Voladura</h1>
+    <p>Activa tu GPS para saber si estás dentro o fuera del radio.</p>
+  </div>
+  <span class="badge">Consulta</span>
+</header>
+
+<main>
+  <section class="result-card">
+    <h2>Resultado</h2>
+    <div id="resultado" class="resultado neutral">Presiona “Activar mi GPS”.</div>
+    <p id="detalle">Se calculará tu distancia aproximada al punto de voladura.</p>
+    <button id="btnGPS" class="primary full">Activar mi GPS</button>
+  </section>
+
+  <section class="panel info">
+    <h2>Datos de la voladura</h2>
+    <div class="cards">
+      <div><small>Voladura</small><strong id="vNombre">-</strong></div>
+      <div><small>Fecha / Hora</small><strong id="vFechaHora">-</strong></div>
+      <div><small>Radio de influencia</small><strong id="vRadio">-</strong></div>
     </div>
-    <span class="badge">Consulta</span>
-  </header>
+  </section>
 
-  <main>
-    <section class="status" id="statusBox">
-      <h2>Resultado</h2>
-      <div id="resultado" class="resultado neutral">Presiona “Activar mi GPS”.</div>
-      <p id="detalle">El sistema calculará tu distancia aproximada al punto de voladura.</p>
-      <button id="btnGPS" class="primary full">Activar mi GPS</button>
-    </section>
+  <section class="map-section">
+    <h2>Mapa GPS</h2>
+    <div id="map"></div>
+    <div class="legend">
+      <span><b class="red"></b> Radio de influencia</span>
+      <span><b class="blue"></b> Mi ubicación</span>
+    </div>
+  </section>
 
-    <section class="panel info">
-      <h2>Datos de la voladura</h2>
-      <div class="cards">
-        <div><small>Fecha</small><strong id="vFecha">-</strong></div>
-        <div><small>Hora</small><strong id="vHora">-</strong></div>
-        <div><small>Radio equipos</small><strong id="vRE">-</strong></div>
-        <div><small>Radio personal</small><strong id="vRP">-</strong></div>
-      </div>
-      <p class="hint">Los datos no son modificables desde esta vista. Solo el responsable debe generar el enlace desde el panel de carga.</p>
-    </section>
+  <section class="panel">
+    <h2>Plano de referencia</h2>
+    <div id="planContainer" class="plan-container"></div>
+  </section>
 
-    <section class="map-section">
-      <h2>Mapa GPS y radios</h2>
-      <div id="map"></div>
-      <div class="legend">
-        <span><b class="red"></b> Radio equipos / exclusión</span>
-        <span><b class="green"></b> Radio personal</span>
-        <span><b class="blue"></b> Mi ubicación</span>
-      </div>
-    </section>
+  <section class="panel small">
+    <p><strong>Nota:</strong> Piloto referencial. Para uso operativo debe validarse con Topografía/GIS y el procedimiento oficial de voladura.</p>
+  </section>
+</main>
 
-    <section class="panel">
-      <h2>Plano de referencia</h2>
-      <img src="plano-voladura.png" alt="Plano de evacuación por voladura" class="plano" />
-    </section>
-
-    <section class="panel small">
-      <p><strong>Nota:</strong> Esta versión piloto es referencial. Para uso operativo debe validarse con Topografía/GIS y el procedimiento oficial de voladura.</p>
-    </section>
-  </main>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

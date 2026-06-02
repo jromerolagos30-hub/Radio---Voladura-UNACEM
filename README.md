@@ -1,18 +1,22 @@
-# Piloto Radio de Voladura UNACEM - Versión 2
+# Piloto Radio de Voladura UNACEM - Versión 3
+
+## Objetivo
+Un solo enlace público para usuarios. El administrador actualiza la información en `data.json`.
 
 ## Archivos
-- index.html: vista pública de consulta. No permite modificar coordenadas.
-- admin.html: panel del responsable para generar el enlace con coordenadas y radios.
+- index.html: vista pública. Sin campos editables.
+- admin.html: panel para preparar y descargar data.json.
+- data.json: contiene coordenadas, radio, fecha/hora y plano cargado.
 - style.css
 - script.js
-- plano-voladura.png
 
 ## Flujo
-1. El responsable abre `admin.html`.
-2. Ingresa coordenadas UTM, radios, fecha y hora.
-3. Genera el enlace de consulta.
-4. Comparte el enlace o QR.
-5. El usuario abre `index.html`, activa GPS y ve si está dentro o fuera del radio.
+1. El administrador abre admin.html.
+2. Actualiza coordenadas, radio, fecha/hora y carga el plano PDF o imagen.
+3. Descarga `data.json`.
+4. En GitHub, sube/reemplaza `data.json`.
+5. Los usuarios siguen entrando al mismo link de index.html y ven lo actualizado.
 
-## Nota
-Para producción se recomienda proteger `admin.html` con autenticación o alojarlo en un entorno interno.
+## Resultado usuario
+- Rojo: dentro del radio.
+- Verde: fuera del radio.
