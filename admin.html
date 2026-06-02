@@ -1,26 +1,101 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Administrador de Voladura</title><link rel="stylesheet" href="style.css"/></head>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Administrador de Voladura</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
 <body data-mode="admin">
-<header><div><h1>Administrador de Voladura</h1><p>Genera un enlace diferente por cada proceso de voladura.</p></div><span class="badge">Admin</span></header>
+<header>
+  <div>
+    <h1>Administrador de Voladura</h1>
+    <p>Carga el plano, registra datos y genera automáticamente un enlace corto por voladura.</p>
+  </div>
+  <span class="badge">Admin</span>
+</header>
+
 <main>
-<section class="panel"><h2>1. Registrar datos</h2><div class="grid">
-<label>Nombre de voladura<input id="blastName" type="text" value="Voladura Atocongo"></label>
-<label>Este UTM X<input id="utmX" type="number" step="0.001" value="292925.533"></label>
-<label>Norte UTM Y<input id="utmY" type="number" step="0.001" value="8651156.600"></label>
-<label>Zona UTM<input id="zone" type="number" value="18"></label>
-<label>Hemisferio<select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select></label>
-<label>Radio equipos (m)<input id="radiusEquipos" type="number" value="300"></label>
-<label>Radio personal (m)<input id="radiusPersonal" type="number" value="500"></label>
-<label>Fecha<input id="date" type="date"></label>
-<label>Hora<input id="time" type="time" value="12:45"></label>
-</div>
-<label class="file-label">URL del plano de evacuación o imagen
-<input id="planUrl" type="url" placeholder="Pega aquí el enlace del plano o imagen"></label>
-<p class="hint">Recomendado: subir el plano a SharePoint/OneDrive/Drive con enlace de visualización y pegar aquí el link. Así el enlace de voladura no se hace demasiado largo.</p>
-<button id="btnPreview">Previsualizar</button><button id="btnLink" class="primary">Generar enlace de esta voladura</button></section>
-<section class="panel"><h2>2. Enlace para compartir</h2><textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado para esta voladura"></textarea><button id="btnCopy">Copiar enlace</button><p class="hint">Este enlace contiene coordenadas y radios. El plano se carga desde la URL indicada.</p></section>
-<section class="map-section"><h2>Previsualización del radio</h2><div id="map"></div><p class="hint"><span class="dot red"></span>Radio equipos &nbsp; <span class="dot green"></span>Radio personal</p></section>
-<section class="panel"><h2>Plano cargado</h2><div id="planContainer" class="plan-container"></div></section>
-</main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="script.js"></script></body></html>
+  <section class="panel">
+    <h2>1. Datos del repositorio</h2>
+    <div class="grid">
+      <label>Usuario / organización GitHub
+        <input id="ghOwner" type="text" value="jromerolagos30-hub">
+      </label>
+      <label>Repositorio
+        <input id="ghRepo" type="text" value="Radio---Voladura-UNACEM">
+      </label>
+      <label>Rama
+        <input id="ghBranch" type="text" value="main">
+      </label>
+      <label>Token GitHub
+        <input id="ghToken" type="password" placeholder="Pega tu token solo para guardar">
+      </label>
+    </div>
+    <p class="hint">El token no se guarda en la página. Solo se usa para subir automáticamente el plano y los datos al repositorio.</p>
+  </section>
+
+  <section class="panel">
+    <h2>2. Registrar voladura</h2>
+    <div class="grid">
+      <label>Nombre de voladura
+        <input id="blastName" type="text" value="Voladura Atocongo">
+      </label>
+      <label>Este UTM X
+        <input id="utmX" type="number" step="0.001" value="292925.533">
+      </label>
+      <label>Norte UTM Y
+        <input id="utmY" type="number" step="0.001" value="8651156.600">
+      </label>
+      <label>Zona UTM
+        <input id="zone" type="number" value="18">
+      </label>
+      <label>Hemisferio
+        <select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select>
+      </label>
+      <label>Radio equipos (m)
+        <input id="radiusEquipos" type="number" value="300">
+      </label>
+      <label>Radio personal (m)
+        <input id="radiusPersonal" type="number" value="500">
+      </label>
+      <label>Fecha
+        <input id="date" type="date">
+      </label>
+      <label>Hora
+        <input id="time" type="time" value="12:45">
+      </label>
+    </div>
+
+    <label class="file-label">Cargar plano de evacuación PDF/JPG/PNG
+      <input id="planFile" type="file" accept="application/pdf,image/png,image/jpeg,image/webp">
+    </label>
+
+    <button id="btnPreview">Previsualizar</button>
+    <button id="btnSave" class="primary">Guardar y generar enlace corto</button>
+    <p id="saveStatus" class="hint"></p>
+  </section>
+
+  <section class="panel">
+    <h2>3. Enlace para compartir</h2>
+    <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace corto generado"></textarea>
+    <button id="btnCopy">Copiar enlace</button>
+    <p class="hint">El usuario usará este enlace corto. El plano y los datos se cargarán desde el repositorio.</p>
+  </section>
+
+  <section class="map-section">
+    <h2>Previsualización del radio</h2>
+    <div id="map"></div>
+    <p class="hint"><span class="dot red"></span>Radio equipos &nbsp; <span class="dot green"></span>Radio personal</p>
+  </section>
+
+  <section class="panel">
+    <h2>Plano cargado</h2>
+    <div id="planContainer" class="plan-container"></div>
+  </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

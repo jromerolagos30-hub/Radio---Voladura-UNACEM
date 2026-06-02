@@ -1,7 +1,11 @@
-# Piloto Radio de Voladura UNACEM - Versión 5
+# Piloto Radio de Voladura UNACEM - Versión 6
 
-Mejoras:
-- No incrusta imagen en el enlace, por eso evita el problema de enlace muy largo.
-- El administrador pega la URL pública del plano.
-- Incluye radio de equipos y radio de personal.
-- El usuario ve rojo si está dentro del radio de personal/equipos y verde si está fuera.
+## Qué mejora
+- El administrador carga el plano PDF/JPG/PNG.
+- Al guardar, la página sube automáticamente el plano y los datos al repositorio.
+- Genera un enlace corto tipo: index.html?id=vol-20260602-124500
+- El usuario abre ese enlace, activa GPS y ve si está dentro o fuera de radio.
+
+## Importante
+Para guardar desde admin.html se requiere un token de GitHub con permiso de escritura sobre el repositorio.
+Para producción, se recomienda reemplazar el token por un backend o SharePoint/Azure.
