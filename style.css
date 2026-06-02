@@ -8,6 +8,7 @@ h1{font-size:22px;margin:0 0 4px}h2{font-size:18px;margin:0 0 12px}p{line-height
 input,select,textarea{width:100%;margin-top:5px;padding:11px;border-radius:10px;border:1px solid var(--line);background:#020617;color:var(--text);font-size:16px}
 textarea{height:95px}button{margin-top:12px;margin-right:8px;border:0;border-radius:12px;padding:12px 14px;background:#475569;color:white;font-weight:bold;font-size:15px}
 button.primary{background:var(--blue)}button.full{width:100%;margin-right:0}.hint{font-size:13px;color:var(--muted)}
+.guide{background:#0b1220}.guide p{font-size:14px;color:#cbd5e1}
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:middle}.red{background:red}.green{background:var(--green)}.blue{background:var(--blue)}
 #map{height:58vh;min-height:420px;width:100%;border-radius:14px;border:1px solid var(--line);background:#0b1220;position:relative;overflow:hidden}
 .resultado{font-weight:bold;font-size:22px;padding:18px;border-radius:12px;text-align:center}.neutral{background:#334155}.ok{background:var(--green)}.peligro{background:var(--red)}
