@@ -1,17 +1,16 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Administrador de Voladura</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="style.css"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Administrador - Radio de Voladura</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body data-mode="admin">
 <header>
   <div>
     <h1>Administrador de Voladura</h1>
-    <p>Registra datos, valida el mapa y genera el enlace para compartir.</p>
+    <p>Actualiza la información. Los usuarios seguirán usando el mismo enlace público.</p>
   </div>
   <span class="badge">Admin</span>
 </header>
@@ -20,47 +19,62 @@
   <section class="panel">
     <h2>1. Registrar / actualizar datos</h2>
     <div class="grid">
-      <label>Nombre de voladura<input id="blastName" type="text" value="Voladura Atocongo"></label>
-      <label>Este UTM X<input id="utmX" type="number" step="0.001" value="292925.533"></label>
-      <label>Norte UTM Y<input id="utmY" type="number" step="0.001" value="8651156.600"></label>
-      <label>Zona UTM<input id="zone" type="number" value="18"></label>
-      <label>Hemisferio<select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select></label>
-      <label>Radio equipos (m)<input id="radiusEquipos" type="number" value="300"></label>
-      <label>Radio personal (m)<input id="radiusPersonal" type="number" value="500"></label>
-      <label>Fecha<input id="date" type="date"></label>
-      <label>Hora<input id="time" type="time" value="12:45"></label>
+      <label>Nombre de voladura
+        <input id="blastName" type="text" value="Voladura Atocongo - Nivel 218">
+      </label>
+      <label>Este UTM X
+        <input id="utmX" type="number" step="0.001">
+      </label>
+      <label>Norte UTM Y
+        <input id="utmY" type="number" step="0.001">
+      </label>
+      <label>Zona UTM
+        <input id="zone" type="number">
+      </label>
+      <label>Hemisferio
+        <select id="hemisphere"><option value="S">Sur</option><option value="N">Norte</option></select>
+      </label>
+      <label>Radio de influencia (m)
+        <input id="radiusMeters" type="number">
+      </label>
+      <label>Fecha
+        <input id="date" type="date">
+      </label>
+      <label>Hora
+        <input id="time" type="time">
+      </label>
     </div>
 
-    <label class="file-label">Opción A: Cargar plano solo para previsualizar en esta PC/celular
-      <input id="planFile" type="file" accept="application/pdf,image/png,image/jpeg,image/webp">
+    <label class="file-label">Cargar plano de evacuación PDF o imagen
+      <input id="planFile" type="file" accept="application/pdf,image/*">
     </label>
 
-    <label class="file-label">Opción B: URL pública del plano para que lo vean todos
-      <input id="planUrl" type="url" placeholder="Pega aquí el enlace público de SharePoint / OneDrive / Drive">
-    </label>
-    <p class="hint">Para uso real, usa la opción B. Si usas SharePoint, pega un enlace “cualquier persona con el vínculo puede ver”.</p>
-
-    <button id="btnPreview">Previsualizar radio y plano</button>
-    <button id="btnGenerate" class="primary">Generar enlace de esta voladura</button>
+    <button id="btnPreview">Previsualizar</button>
+    <button id="btnExport" class="primary">Descargar data.json actualizado</button>
+    <p class="hint">
+      Para que todos vean lo actualizado con el mismo enlace, sube este archivo <strong>data.json</strong> al repositorio y reemplaza el anterior.
+    </p>
   </section>
 
   <section class="panel">
     <h2>2. Enlace único para usuarios</h2>
-    <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado para esta voladura"></textarea>
-    <button id="btnCopy">Copiar enlace</button>
-    <p class="hint">El enlace incluye fecha y hora: <strong>?v=AAAAMMDD-HHMM</strong>.</p>
+    <textarea id="publicLink" readonly></textarea>
+    <button id="btnCopy">Copiar enlace único</button>
+    <p class="hint">Este enlace no cambia. Solo cambia el archivo data.json cuando actualices la voladura.</p>
   </section>
 
   <section class="map-section">
-    <h2>Previsualización del radio</h2>
+    <h2>Previsualización</h2>
     <div id="map"></div>
-    <p class="hint"><span class="dot green"></span>Radio equipos &nbsp; <span class="dot red"></span>Radio personal</p>
   </section>
 
   <section class="panel">
-    <h2>Plano de referencia</h2>
+    <h2>Plano cargado</h2>
     <div id="planContainer" class="plan-container"></div>
-    <p id="planNotice" class="hint"></p>
+  </section>
+
+  <section class="panel small">
+    <p><strong>Importante:</strong> En esta versión estática, GitHub Pages no guarda cambios automáticamente. El administrador descarga el <strong>data.json</strong> y lo sube al repositorio reemplazando el anterior. Para una versión empresarial, esto se automatiza con base de datos y login.</p>
   </section>
 </main>
 
