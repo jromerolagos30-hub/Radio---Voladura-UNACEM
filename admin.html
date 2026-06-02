@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel de carga - Radio de Voladura</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-mode="admin">
+  <header>
+    <div>
+      <h1>Panel de carga de voladura</h1>
+      <p>Uso exclusivo del responsable que genera el enlace para consulta.</p>
+    </div>
+    <span class="badge">Operador</span>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>1. Registrar datos</h2>
+      <div class="grid">
+        <label>Este UTM X
+          <input id="utmX" type="number" step="0.001" value="292925.533">
+        </label>
+        <label>Norte UTM Y
+          <input id="utmY" type="number" step="0.001" value="8651196.600">
+        </label>
+        <label>Zona UTM
+          <input id="zone" type="number" value="18">
+        </label>
+        <label>Hemisferio
+          <select id="hem">
+            <option value="S" selected>Sur</option>
+            <option value="N">Norte</option>
+          </select>
+        </label>
+        <label>Radio equipos (m)
+          <input id="rEquipos" type="number" value="300">
+        </label>
+        <label>Radio personal (m)
+          <input id="rPersonal" type="number" value="500">
+        </label>
+        <label>Fecha
+          <input id="fecha" type="date">
+        </label>
+        <label>Hora
+          <input id="hora" type="time" value="12:15">
+        </label>
+      </div>
+      <button id="btnPreview">Previsualizar radios</button>
+      <button id="btnLink" class="primary">Generar enlace de consulta</button>
+    </section>
+
+    <section class="panel">
+      <h2>2. Enlace para compartir</h2>
+      <textarea id="linkSalida" readonly placeholder="Aquí aparecerá el enlace para QR o WhatsApp"></textarea>
+      <button id="btnCopy">Copiar enlace</button>
+      <p class="hint">Este enlace abre la vista pública sin campos editables.</p>
+    </section>
+
+    <section class="map-section">
+      <h2>Previsualización</h2>
+      <div id="map"></div>
+    </section>
+
+    <section class="panel small">
+      <p><strong>Importante:</strong> Este panel no reemplaza un control de acceso real. Para producción debe tener autenticación o estar alojado en un entorno interno.</p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

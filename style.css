@@ -3,28 +3,70 @@
   --green:#16a34a; --yellow:#f59e0b; --red:#dc2626; --blue:#2563eb;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial, Helvetica, sans-serif;background:var(--bg);color:var(--text)}
+html,body{margin:0;min-height:100%;overflow-x:hidden;font-family:Arial, Helvetica, sans-serif;background:var(--bg);color:var(--text)}
 header{padding:18px 16px;background:#020617;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
 h1{font-size:22px;margin:0 0 4px}
 h2{font-size:18px;margin:0 0 12px}
 p{line-height:1.4}
 header p{margin:0;color:var(--muted);font-size:14px}
 .badge{background:var(--blue);padding:8px 10px;border-radius:999px;font-weight:bold}
-main{padding:14px;max-width:1100px;margin:auto}
-.panel,.status{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 10px 20px rgba(0,0,0,.18)}
+main{padding:14px;max-width:1050px;margin:auto}
+.panel,.status,.map-section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 10px 20px rgba(0,0,0,.18);overflow:hidden}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
 label{font-size:13px;color:var(--muted)}
-input,select{width:100%;margin-top:5px;padding:11px;border-radius:10px;border:1px solid var(--line);background:#020617;color:var(--text);font-size:16px}
+input,select,textarea{width:100%;margin-top:5px;padding:11px;border-radius:10px;border:1px solid var(--line);background:#020617;color:var(--text);font-size:16px}
+textarea{height:110px}
 button{margin-top:12px;margin-right:8px;border:0;border-radius:12px;padding:12px 14px;background:#475569;color:white;font-weight:bold;font-size:15px}
 button.primary{background:var(--blue)}
+button.full{width:100%;margin-right:0}
 .hint{font-size:13px;color:var(--muted)}
-#map{height:62vh;min-height:430px;border-radius:14px;border:1px solid var(--line)}
+#map{height:58vh;min-height:420px;width:100%;border-radius:14px;border:1px solid var(--line);background:#0b1220;position:relative;overflow:hidden}
 .resultado{font-weight:bold;font-size:18px;padding:14px;border-radius:12px;text-align:center}
 .neutral{background:#334155}
 .ok{background:var(--green)}
 .alerta{background:var(--yellow);color:#111827}
 .peligro{background:var(--red)}
-.plano{width:100%;border-radius:12px;border:1px solid var(--line);background:white}
+.plano{width:100%;border-radius:12px;border:1px solid var(--line);background:white;display:block}
 .small{font-size:14px;color:#d1d5db}
-ol{padding-left:22px}
-@media(max-width:650px){#map{height:55vh;min-height:360px}h1{font-size:20px}}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cards div{background:#020617;border:1px solid var(--line);border-radius:12px;padding:12px}
+.cards small{display:block;color:var(--muted);margin-bottom:5px}
+.cards strong{font-size:18px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:13px;color:#cbd5e1}
+.legend b{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.red{background:red}.green{background:lime}.blue{background:#2563eb}
+
+/* Leaflet CSS mínimo incorporado para evitar superposición de mosaicos si falla el CDN */
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-container{overflow:hidden;touch-action:pan-x pan-y;background:#ddd;outline-offset:1px}
+.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow{user-select:none;-webkit-user-drag:none}
+.leaflet-tile::selection{background:transparent}
+.leaflet-safari .leaflet-tile{image-rendering:-webkit-optimize-contrast}
+.leaflet-marker-icon,.leaflet-marker-shadow{display:block}
+.leaflet-container .leaflet-overlay-pane svg{max-width:none!important;max-height:none!important}
+.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-shadow-pane img,.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer,.leaflet-container .leaflet-tile{max-width:none!important;max-height:none!important;width:auto;padding:0}
+.leaflet-container img.leaflet-tile{mix-blend-mode:plus-lighter}
+.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
+.leaflet-map-pane{z-index:0}.leaflet-pane{z-index:400}
+.leaflet-control{position:relative;z-index:800;pointer-events:auto}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+.leaflet-control{float:left;clear:both}
+.leaflet-right .leaflet-control{float:right}
+.leaflet-top .leaflet-control{margin-top:10px}
+.leaflet-bottom .leaflet-control{margin-bottom:10px}
+.leaflet-left .leaflet-control{margin-left:10px}
+.leaflet-right .leaflet-control{margin-right:10px}
+.leaflet-control-zoom a{background:#fff;color:#000;text-decoration:none;display:block;width:30px;height:30px;line-height:30px;text-align:center;border-bottom:1px solid #ccc}
+.leaflet-control-attribution{background:rgba(255,255,255,.8);font-size:11px;padding:2px 5px;color:#333}
+.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}
+.leaflet-popup-content-wrapper{background:white;color:#333;border-radius:12px;padding:1px;text-align:left}
+.leaflet-popup-content{margin:13px 18px;line-height:1.3;font-size:13px;min-height:1px}
+.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-left:-20px;overflow:hidden;pointer-events:none}
+.leaflet-popup-tip{background:white;width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg)}
+.leaflet-interactive{cursor:pointer}
+@media(max-width:650px){
+  #map{height:52vh;min-height:360px}
+  h1{font-size:20px}
+  .cards{grid-template-columns:1fr 1fr}
+}
