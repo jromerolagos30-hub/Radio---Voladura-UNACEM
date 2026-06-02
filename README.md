@@ -1,9 +1,11 @@
-# Piloto Radio de Voladura UNACEM - Versión 7
+# Piloto Radio de Voladura UNACEM - Versión 8
 
-Pantalla de administrador simplificada:
-- Sin token
-- Sin usuario
-- Sin repositorio
-- Sin rama
+Mejora solicitada:
+- Enlace corto como la versión inicial.
+- No incrusta el plano dentro del enlace.
+- Mantiene carga de plano en el administrador.
+- Radio de equipos y radio de personal.
+- Usuario ve rojo o verde con GPS.
 
-Genera enlace por voladura desde el navegador, con coordenadas, radios y plano cargado.
+Limitación:
+- El plano cargado se guarda en el navegador del administrador. Para compartir el plano a otros equipos con enlace corto, la versión corporativa debe usar SharePoint, Google Drive o backend.
