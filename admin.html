@@ -1,31 +1,129 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>UNACEM | Administrador de Voladura</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="style.css"/></head>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>UNACEM | Administrador de Voladura</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
 <body data-mode="admin">
 <div class="app-shell">
-<aside class="sidebar">
-  <div class="brand"><img src="logo-unacem.png" alt="UNACEM" class="logo-unacem"></div>
-  <div class="side-title">RADIO DE VOLADURA</div>
-  <div class="side-subtitle">Sistema de Control de Exclusión</div>
-  <div class="side-footer">Administrador</div>
-</aside>
-<main class="content">
-<section class="topbar"><h1>Administrador de Radio de Voladura</h1><p>Registra la información, valida los radios y genera el enlace para compartir.</p></section>
-<section class="card"><h2>1. Registrar / actualizar datos</h2><div class="form-grid">
-<label>Nombre de voladura<input id="blastName" type="text" value="Voladura Atocongo"></label>
-<label>Este UTM X<input id="utmX" type="number" step="0.001" value="292925.533"></label>
-<label>Norte UTM Y<input id="utmY" type="number" step="0.001" value="8651156.600"></label>
-<label>Zona UTM<input id="zone" type="number" value="18"></label>
-<label>Hemisferio<select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select></label>
-<label>Radio equipos (m)<input id="radiusEquipos" type="number" value="300"></label>
-<label>Radio personal (m)<input id="radiusPersonal" type="number" value="500"></label>
-<label>Fecha<input id="date" type="date"></label>
-<label>Hora<input id="time" type="time" value="12:45"></label>
-</div><div class="actions"><button id="btnPreview" class="btn secondary">Previsualizar radio</button><button id="btnGenerate" class="btn primary">Generar enlace de esta voladura</button></div></section>
-<section class="card"><h2>2. Enlace único para usuarios</h2><textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado para esta voladura"></textarea><button id="btnCopy" class="btn secondary">Copiar enlace</button><p class="hint">El enlace incluye fecha y hora: <strong>?v=AAAAMMDD-HHMM</strong>.</p></section>
-<section class="card map-section"><h2>Previsualización del radio</h2><div id="map"></div><p class="legend"><span class="dot green"></span>Radio equipos &nbsp; <span class="dot red"></span>Radio personal</p></section>
-</main></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="script.js"></script></body></html>
+  <aside class="sidebar">
+    <div class="brand"><img src="logo-unacem.png" alt="UNACEM" class="logo-unacem"></div>
+    <div class="side-title">RADIO DE VOLADURA</div>
+    <div class="side-subtitle">Sistema de Control de Exclusión</div>
+    <div class="side-footer">Administrador</div>
+  </aside>
+
+  <main class="content">
+    <section class="topbar">
+      <h1>Administrador de Radio de Voladura</h1>
+      <p>Registra hasta 2 voladuras por día, define coordenadas y ángulo de rotación de cada zona.</p>
+    </section>
+
+    <section class="card">
+      <h2>1. Datos generales</h2>
+      <div class="form-grid">
+        <label>Nombre del evento / día
+          <input id="eventName" type="text" value="Voladuras Atocongo">
+        </label>
+        <label>Zona UTM
+          <input id="zone" type="number" value="18">
+        </label>
+        <label>Hemisferio
+          <select id="hemisphere">
+            <option value="S" selected>Sur</option>
+            <option value="N">Norte</option>
+          </select>
+        </label>
+        <label>Radio equipos (m)
+          <input id="radiusEquipos" type="number" value="300">
+        </label>
+        <label>Radio personal (m)
+          <input id="radiusPersonal" type="number" value="500">
+        </label>
+        <label>Fecha
+          <input id="date" type="date">
+        </label>
+      </div>
+    </section>
+
+    <section class="card blast-card">
+      <div class="blast-title">
+        <h2>2. Primera voladura</h2>
+        <label class="checkline"><input id="b1Enabled" type="checkbox" checked> Activar</label>
+      </div>
+      <div class="form-grid">
+        <label>Nombre de primera voladura
+          <input id="b1Name" type="text" value="Primera voladura">
+        </label>
+        <label>Este UTM X - primera voladura
+          <input id="b1UtmX" type="number" step="0.001" value="292925.533">
+        </label>
+        <label>Norte UTM Y - primera voladura
+          <input id="b1UtmY" type="number" step="0.001" value="8651156.600">
+        </label>
+        <label>Hora primera voladura
+          <input id="b1Time" type="time" value="12:45">
+        </label>
+        <label>Ángulo de giro / rotación (° horario desde el Norte)
+          <input id="b1Angle" type="number" step="0.01" min="0" max="360" value="0">
+        </label>
+      </div>
+    </section>
+
+    <section class="card blast-card">
+      <div class="blast-title">
+        <h2>3. Segunda voladura</h2>
+        <label class="checkline"><input id="b2Enabled" type="checkbox"> Activar</label>
+      </div>
+      <div class="form-grid">
+        <label>Nombre de segunda voladura
+          <input id="b2Name" type="text" value="Segunda voladura">
+        </label>
+        <label>Este UTM X - segunda voladura
+          <input id="b2UtmX" type="number" step="0.001" value="292925.533">
+        </label>
+        <label>Norte UTM Y - segunda voladura
+          <input id="b2UtmY" type="number" step="0.001" value="8651156.600">
+        </label>
+        <label>Hora segunda voladura
+          <input id="b2Time" type="time" value="15:00">
+        </label>
+        <label>Ángulo de giro / rotación (° horario desde el Norte)
+          <input id="b2Angle" type="number" step="0.01" min="0" max="360" value="0">
+        </label>
+      </div>
+    </section>
+
+    <section class="card actions-card">
+      <h2>4. Previsualizar y generar enlace</h2>
+      <div class="actions">
+        <button id="btnPreview" class="btn secondary">Previsualizar radios</button>
+        <button id="btnGenerate" class="btn primary">Generar enlace de estas voladuras</button>
+      </div>
+      <p class="hint">La forma del radio no cambia: solo rota según el ángulo ingresado para cada voladura.</p>
+    </section>
+
+    <section class="card">
+      <h2>5. Enlace único para usuarios</h2>
+      <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado para los usuarios"></textarea>
+      <button id="btnCopy" class="btn secondary">Copiar enlace</button>
+      <p class="hint">El enlace incluye la fecha: <strong>?v=AAAAMMDD</strong> y los datos cifrados en el hash.</p>
+    </section>
+
+    <section class="card map-section">
+      <h2>Previsualización del radio</h2>
+      <div id="map"></div>
+      <p class="legend">
+        <span class="dot red"></span>Sector de riesgo para equipos &nbsp;
+        <span class="dot green"></span>Radio de evacuación de personal
+      </p>
+    </section>
+  </main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
