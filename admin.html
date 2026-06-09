@@ -1,10 +1,79 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>UNACEM | Administrador de Voladura V17</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><link rel="stylesheet" href="style.css"/></head>
-<body data-mode="admin"><div class="app-shell"><aside class="sidebar"><div class="brand"><img src="logo-unacem.png" alt="UNACEM" class="logo-unacem"></div><div class="side-title">RADIO DE VOLADURA</div><div class="side-subtitle">Sistema de Control de Exclusión</div><div class="side-footer">Administrador · V17</div></aside>
-<main class="content"><section class="topbar"><h1>Administrador de Radio de Voladura</h1><p>Registra hasta 2 voladuras por día, define sus coordenadas y el ángulo de giro de la plantilla.</p></section>
-<section class="card"><h2>1. Datos generales</h2><div class="form-grid"><label>Nombre del evento<input id="eventName" type="text" value="Voladuras Atocongo"></label><label>Zona UTM<input id="zone" type="number" value="18"></label><label>Hemisferio<select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select></label><label>Fecha<input id="date" type="date"></label><label>Hora<input id="time" type="time" value="12:45"></label></div></section>
-<section class="card blast-card"><h2>2. Primera voladura</h2><div class="form-grid"><label>Activar<select id="v1Enabled"><option value="true" selected>Sí</option><option value="false">No</option></select></label><label>Nombre<input id="v1Name" type="text" value="Primera voladura"></label><label>Este UTM X<input id="v1UtmX" type="number" step="0.001" value="292925.533"></label><label>Norte UTM Y<input id="v1UtmY" type="number" step="0.001" value="8651156.600"></label><label>Ángulo de giro / rotación (° horario)<input id="v1Angle" type="number" step="0.1" value="0"></label></div></section>
-<section class="card blast-card"><h2>3. Segunda voladura</h2><div class="form-grid"><label>Activar<select id="v2Enabled"><option value="false" selected>No</option><option value="true">Sí</option></select></label><label>Nombre<input id="v2Name" type="text" value="Segunda voladura"></label><label>Este UTM X<input id="v2UtmX" type="number" step="0.001" value="292925.533"></label><label>Norte UTM Y<input id="v2UtmY" type="number" step="0.001" value="8651156.600"></label><label>Ángulo de giro / rotación (° horario)<input id="v2Angle" type="number" step="0.1" value="180"></label></div></section>
-<section class="card"><h2>4. Generar enlace</h2><div class="actions"><button id="btnPreview" class="btn secondary">Previsualizar radios</button><button id="btnGenerate" class="btn primary">Generar enlace para usuarios</button></div><textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado"></textarea><button id="btnCopy" class="btn secondary">Copiar enlace</button><p class="hint">El enlace incluye fecha y hora: <strong>?v=AAAAMMDD-HHMM</strong>. Plantilla V17: rojo = equipos, verde = personal.</p></section>
-<section class="card map-section"><h2>Previsualización de radios</h2><div id="map"></div><p class="legend"><span class="dot red"></span>Sector de riesgo para equipos &nbsp; <span class="dot green"></span>Radio de evacuación de personal</p></section></main></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="script.js"></script></body></html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>UNACEM | Administrador de Voladura V18</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body data-mode="admin">
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand"><img src="logo-unacem.png" alt="UNACEM" class="logo-unacem"></div>
+  <div class="side-title">RADIO DE VOLADURA</div>
+  <div class="side-subtitle">Sistema de Control de Exclusión</div>
+  <div class="side-footer">Administrador · V18</div>
+</aside>
+
+<main class="content">
+<section class="topbar">
+  <h1>Administrador de Radio de Voladura</h1>
+  <p>Registra hasta 2 voladuras por día. Cada voladura tiene coordenadas y ángulo de rotación propio.</p>
+</section>
+
+<section class="card">
+  <h2>1. Datos generales</h2>
+  <div class="form-grid">
+    <label>Nombre del evento<input id="eventName" type="text" value="Voladuras Atocongo"></label>
+    <label>Zona UTM<input id="zone" type="number" value="18"></label>
+    <label>Hemisferio<select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select></label>
+    <label>Fecha<input id="date" type="date"></label>
+    <label>Hora<input id="time" type="time" value="12:45"></label>
+  </div>
+</section>
+
+<section class="card blast-card">
+  <h2>2. Primera voladura</h2>
+  <div class="form-grid">
+    <label>Activar<select id="v1Enabled"><option value="true" selected>Sí</option><option value="false">No</option></select></label>
+    <label>Nombre<input id="v1Name" type="text" value="Primera voladura"></label>
+    <label>Este UTM X<input id="v1UtmX" type="number" step="0.001" value="292925.533"></label>
+    <label>Norte UTM Y<input id="v1UtmY" type="number" step="0.001" value="8651156.600"></label>
+    <label>Ángulo de rotación horario (°)<input id="v1Angle" type="number" step="0.1" value="0"></label>
+  </div>
+</section>
+
+<section class="card blast-card">
+  <h2>3. Segunda voladura</h2>
+  <div class="form-grid">
+    <label>Activar<select id="v2Enabled"><option value="false" selected>No</option><option value="true">Sí</option></select></label>
+    <label>Nombre<input id="v2Name" type="text" value="Segunda voladura"></label>
+    <label>Este UTM X<input id="v2UtmX" type="number" step="0.001" value="292925.533"></label>
+    <label>Norte UTM Y<input id="v2UtmY" type="number" step="0.001" value="8651156.600"></label>
+    <label>Ángulo de rotación horario (°)<input id="v2Angle" type="number" step="0.1" value="180"></label>
+  </div>
+</section>
+
+<section class="card">
+  <h2>4. Enlace para usuarios</h2>
+  <div class="actions">
+    <button id="btnPreview" class="btn secondary">Previsualizar radios</button>
+    <button id="btnGenerate" class="btn primary">Generar enlace</button>
+  </div>
+  <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado"></textarea>
+  <button id="btnCopy" class="btn secondary">Copiar enlace</button>
+  <p class="hint">Plantilla geométrica V18: rojo = sector de riesgo para equipos; verde = radio de evacuación de personal.</p>
+</section>
+
+<section class="card map-section">
+  <h2>Previsualización de radios</h2>
+  <div id="map"></div>
+  <p class="legend"><span class="dot red"></span>Sector de riesgo para equipos &nbsp; <span class="dot green"></span>Radio de evacuación de personal</p>
+</section>
+</main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
