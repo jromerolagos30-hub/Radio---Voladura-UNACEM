@@ -1,38 +1,40 @@
-# Especificación Técnica - V21 FINAL UNACEM
+# Especificación técnica - V18
 
-## Objetivo
+## Requerimiento implementado
 
-Generar el contorno real del radio de voladura UNACEM utilizando plantilla geométrica, rotación y georreferenciación referencial.
+La aplicación debe reproducir el contorno real del radio de voladura de la imagen de referencia, usando coordenadas referenciales.
 
-## Datos por voladura
+## Método
 
-- Nombre
-- Centro UTM Norte
-- Centro UTM Este
-- Ángulo de giro
-- Radio personas
-- Radio equipos
-- Estado
+Se usa una plantilla geométrica local. La plantilla se rota y traslada al centro de cada voladura.
 
-## Plantilla personas R=150
+### Fórmula de rotación
 
-[-90,120], [-240,320], [-155,410], [0,450], [155,410], [240,320], [90,120], [150,-150], [0,-300], [-150,-150]
+Para cada punto local `(x,y)`:
 
-## Plantilla equipos R=300
+```text
+xr = x*cos(a) - y*sin(a)
+yr = x*sin(a) + y*cos(a)
+```
 
-[-180,240], [-420,560], [-260,700], [0,730], [260,700], [420,560], [180,240], [300,-300], [0,-600], [-300,-300]
+donde `a` es el ángulo de giro en grados convertido a radianes.
 
-## Fórmula de rotación
+### Conversión aproximada a geografía
 
-x’ = x cos θ - y sin θ
-y’ = x sin θ + y cos θ
+```text
+lat = lat0 + (dy / R) * 180/pi
+lng = lng0 + (dx / (R*cos(lat0))) * 180/pi
+```
 
-## Algoritmo
+donde:
 
-1. Leer datos de voladura.
-2. Escalar plantilla según radio.
-3. Rotar por ángulo.
-4. Trasladar al centro UTM.
-5. Convertir a Lat/Lng.
-6. Dibujar con L.polygon.
-7. Validar GPS con punto-en-polígono.
+- `R = 6378137 m`
+- `lat0/lng0` = centro de voladura.
+
+## Control de usuario
+
+La ubicación del usuario se obtiene con GPS del navegador y se valida con algoritmo punto-en-polígono.
+
+## Limitación
+
+Las coordenadas son referenciales por imagen. Para precisión final, se recomienda reemplazar los puntos por coordenadas obtenidas del CAD/DXF.
