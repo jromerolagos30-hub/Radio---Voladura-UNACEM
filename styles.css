@@ -1,0 +1,89 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f5;
+  color: #1f2933;
+}
+header {
+  background: #0b7f2a;
+  color: white;
+  padding: 18px 24px;
+}
+header h1 { margin: 0; font-size: 24px; }
+header p { margin: 4px 0 0; }
+main {
+  display: grid;
+  grid-template-columns: 430px 1fr;
+  gap: 16px;
+  padding: 16px;
+}
+.panel {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+.grid { display: grid; gap: 12px; }
+.card {
+  border: 1px solid #d9e2dc;
+  border-radius: 10px;
+  padding: 12px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin: 8px 0;
+}
+input, textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid #c7d1cc;
+  border-radius: 7px;
+}
+input[type="checkbox"] { width: auto; }
+textarea { min-height: 75px; }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+button {
+  background: #0b7f2a;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+button:hover { background: #075f20; }
+.note { font-size: 13px; color: #4b5563; }
+#map {
+  height: 680px;
+  border-radius: 12px;
+  border: 1px solid #d9e2dc;
+}
+.estado {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+.estado.dentro {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+.estado.fuera {
+  background: #dcfce7;
+  border-color: #22c55e;
+  color: #166534;
+}
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
+  #map { height: 520px; }
+}

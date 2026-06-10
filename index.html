@@ -1,58 +1,68 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>UNACEM | Consulta Radio de Voladura V18</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="style.css"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Radio de Voladura UNACEM - V18 Contorno Real</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
-<body data-mode="viewer">
-<div class="app-shell">
-<aside class="sidebar">
-  <div class="brand"><img src="logo-unacem.png" alt="UNACEM" class="logo-unacem"></div>
-  <div class="side-title">RADIO DE VOLADURA</div>
-  <div class="side-subtitle">Sistema de Control de Exclusión</div>
-  <div class="side-footer">Seguridad Operacional · V18</div>
-</aside>
-
-<main class="content">
-<section class="topbar">
-  <h1>Consulta de Radio de Voladura</h1>
-  <p>Activa tu GPS para verificar tu ubicación respecto a las zonas activas.</p>
-</section>
-
-<section class="grid-main">
-  <section class="card result-card">
-    <h2>Resultado</h2>
-    <div id="resultado" class="resultado neutral">Presiona “Activar mi GPS”.</div>
-    <p id="detalle">Se calculará si estás dentro del sector rojo, dentro del radio verde o fuera.</p>
-    <button id="btnGPS" class="btn primary full">Activar mi GPS</button>
-  </section>
-
-  <section class="card">
-    <h2>Datos de las voladuras</h2>
-    <div class="cards">
-      <div><small>Evento</small><strong id="vEvento">-</strong></div>
-      <div><small>Fecha / Hora</small><strong id="vFechaHora">-</strong></div>
-      <div><small>Voladuras activas</small><strong id="vCantidad">-</strong></div>
+<body>
+  <header>
+    <div>
+      <h1>Radio de Voladura UNACEM</h1>
+      <p>V18 - Contorno real por plantilla geométrica, rotación y georreferenciación</p>
     </div>
-    <div id="blastList" class="blast-list"></div>
-  </section>
-</section>
+  </header>
 
-<section class="card map-section">
-  <h2>Mapa GPS</h2>
-  <div id="map"></div>
-  <p class="legend"><span class="dot red"></span>Sector de riesgo para equipos &nbsp; <span class="dot green"></span>Radio de evacuación de personal &nbsp; <span class="dot blue"></span>Mi ubicación</p>
-</section>
+  <main>
+    <section class="panel">
+      <h2>Administrador</h2>
+      <p class="note">Permite configurar hasta 2 voladuras por día. Cada voladura tiene coordenada, fecha/hora y ángulo de giro independiente.</p>
 
-<section class="card note">
-  <strong>Nota:</strong> Piloto referencial. La geometría V18 usa la plantilla tipo CAD y se rota según el ángulo ingresado por el administrador, sin modificar dimensiones.
-</section>
-</main>
-</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="script.js"></script>
+      <div class="grid">
+        <div class="card">
+          <h3>Voladura 1</h3>
+          <label>Nombre <input id="v1_nombre" value="Voladura 1"></label>
+          <label>Latitud centro <input id="v1_lat" type="number" step="0.000001" value="-12.160000"></label>
+          <label>Longitud centro <input id="v1_lng" type="number" step="0.000001" value="-76.930000"></label>
+          <label>Fecha <input id="v1_fecha" type="date"></label>
+          <label>Hora <input id="v1_hora" type="time" value="12:00"></label>
+          <label>Ángulo de giro (° respecto al Norte) <input id="v1_ang" type="number" step="0.1" value="0"></label>
+          <label><input id="v1_activa" type="checkbox" checked> Activar voladura 1</label>
+        </div>
+
+        <div class="card">
+          <h3>Voladura 2</h3>
+          <label>Nombre <input id="v2_nombre" value="Voladura 2"></label>
+          <label>Latitud centro <input id="v2_lat" type="number" step="0.000001" value="-12.161000"></label>
+          <label>Longitud centro <input id="v2_lng" type="number" step="0.000001" value="-76.931000"></label>
+          <label>Fecha <input id="v2_fecha" type="date"></label>
+          <label>Hora <input id="v2_hora" type="time" value="15:00"></label>
+          <label>Ángulo de giro (° respecto al Norte) <input id="v2_ang" type="number" step="0.1" value="0"></label>
+          <label><input id="v2_activa" type="checkbox"> Activar voladura 2</label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button onclick="actualizar()">Actualizar mapa</button>
+        <button onclick="generarEnlace()">Generar enlace de usuario</button>
+        <button onclick="activarGPS()">Activar GPS</button>
+      </div>
+
+      <label>Enlace para usuarios finales
+        <textarea id="enlace" readonly></textarea>
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>Usuario final</h2>
+      <div id="estado" class="estado">Active el GPS para validar si se encuentra dentro o fuera del radio de voladura.</div>
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
