@@ -4,21 +4,18 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#0
 .sidebar{background:linear-gradient(180deg,#06192b,#0b2238);color:white;padding:20px}
 .brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}
 .shield{width:40px;height:40px;background:#ef1c25;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:22px}
-.brand h1{margin:0;font-size:28px}
-.brand p{margin:2px 0 0;color:#cfd8e3;font-size:12px;letter-spacing:1px}
+.brand h1{margin:0;font-size:28px}.brand p{margin:2px 0 0;color:#cfd8e3;font-size:12px;letter-spacing:1px}
 nav{display:grid;gap:10px}
 nav button{width:100%;background:transparent;border:0;color:white;text-align:left;padding:13px 14px;border-radius:9px;cursor:pointer;font-size:15px}
 nav button.active,nav button:hover{background:#0057d9}
 .legend{margin-top:28px;border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px}
-.legend h3{margin-top:0;font-size:14px}
-.legend p{font-size:13px;line-height:1.35}
+.legend h3{margin-top:0;font-size:14px}.legend p{font-size:13px;line-height:1.35}
 .dot{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:8px;vertical-align:middle}
 .red{background:#ef1c25}.green{background:#22c55e}.blue{background:#0b6ef3}
 .dash{display:inline-block;width:24px;border-top:2px dashed white;margin-right:8px;vertical-align:middle}
 main{min-width:0}
 .topbar{background:white;border-bottom:1px solid #e2e8f0;min-height:86px;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:14px}
-.topbar h2{margin:0;font-size:22px}
-.topbar small{color:#526071}
+.topbar h2{margin:0;font-size:22px}.topbar small{color:#526071}
 .top-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 label{display:block;font-size:13px;margin:9px 0}
 input,select{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:7px;margin-top:4px;background:white}
@@ -28,17 +25,16 @@ button:hover{background:#eef4ff}
 .content{display:grid;grid-template-columns:1fr 420px;gap:18px;padding:18px}
 .map-card{position:relative;background:white;border:1px solid #dbe3ef;border-radius:12px;overflow:hidden}
 #map{height:700px}
+.blast-template-icon{background:transparent;border:0}
+.blast-template-icon img{display:block;pointer-events:none}
 .scale{position:absolute;left:22px;bottom:20px;z-index:800;background:white;border-radius:8px;border:1px solid #d1d9e6;padding:10px 14px;font-size:13px}
-.gps-status{position:absolute;right:22px;bottom:20px;z-index:800;background:white;border-radius:8px;border:1px solid #d1d9e6;padding:10px 14px;font-weight:700;max-width:420px}
-.gps-status.safe{background:#dcfce7;color:#166534;border-color:#22c55e}
-.gps-status.danger{background:#fee2e2;color:#991b1b;border-color:#ef4444}
+.gps-status{position:absolute;right:22px;bottom:20px;z-index:800;background:white;border-radius:8px;border:1px solid #d1d9e6;padding:10px 14px;font-weight:700;max-width:430px}
+.gps-status.safe{background:#dcfce7;color:#166534;border-color:#22c55e}.gps-status.danger{background:#fee2e2;color:#991b1b;border-color:#ef4444}
 .panel{background:white;border:1px solid #dbe3ef;border-radius:12px;padding:16px;max-height:735px;overflow:auto}
-.panel h3{margin-top:0}
-.blast-card{border:1px solid #dbe3ef;border-radius:12px;padding:14px;margin-bottom:14px}
+.panel h3{margin-top:0}.blast-card{border:1px solid #dbe3ef;border-radius:12px;padding:14px;margin-bottom:14px}
 .blast-title{display:flex;align-items:center;justify-content:space-between}
 .blast-title span{background:#dcfce7;color:#15803d;font-size:11px;padding:4px 7px;border-radius:6px;font-weight:700}
-.check input{width:auto}
-.panel button{width:100%;margin-top:8px}
+.check input{width:auto}.panel button{width:100%;margin-top:8px}
 .primary{background:#0057d9;color:white;border-color:#0057d9;width:100%;margin-top:10px}
 .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 18px 18px}
 .summary div{background:white;border:1px solid #dbe3ef;border-radius:12px;padding:16px;min-height:74px}

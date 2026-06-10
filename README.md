@@ -1,6 +1,6 @@
-# Radio de Voladura UNACEM - V22
+# Radio de Voladura UNACEM - V23
 
-Versión con la misma estructura simple de la V18:
+Versión con estructura simple igual a la V18:
 
 ```text
 index.html
@@ -10,45 +10,39 @@ README.md
 ESPECIFICACION_TECNICA.md
 ```
 
-## Mejora principal
+## Cambio principal
 
-La V22 cambia el método de generación del contorno:
+La V23 deja de intentar reconstruir el contorno mediante polígonos o arcos matemáticos.
 
-Antes:
+Ahora usa una **imagen SVG plantilla** del contorno referencial y la coloca sobre el mapa como:
+
 ```text
-Polígono recto por pocos vértices.
+Imagen georreferenciada + escala + rotación
 ```
 
-Ahora:
-```text
-Contorno curvo paramétrico por arcos + líneas + rotación.
-```
+## Ventaja
 
-## Nuevos campos de configuración
+Visualmente se aproxima mucho más al contorno aprobado, porque se controla la forma como imagen y no como cálculo geométrico imperfecto.
 
-Por cada voladura:
+## Campos por voladura
 
+- Nombre.
 - Centro UTM Norte.
 - Centro UTM Este.
 - Ángulo de giro / línea de perforación.
 - Radio personas.
 - Radio equipos.
-- Ángulo lateral izquierdo.
-- Ángulo lateral derecho.
-- Factor de arco superior.
-- Longitud lateral referencial.
-- Resolución de curva.
+- Dimensión lateral referencial 394.83 m.
+- Opacidad de plantilla.
 - Estado.
 - Activo / inactivo.
 
-## Uso
+## Uso en GitHub Pages
 
-1. Abrir `index.html`.
-2. Configurar Voladura 1 y/o Voladura 2.
-3. Presionar `Actualizar contornos`.
-4. Activar GPS para validar ubicación.
-5. Exportar GeoJSON o configuración JSON.
+1. Subir los 5 archivos a la raíz del repositorio.
+2. Activar GitHub Pages.
+3. Abrir `index.html`.
 
-## GitHub Pages
+## Nota
 
-Subir estos 5 archivos a la raíz del repositorio y activar Pages desde `Settings > Pages`.
+La validación GPS en esta versión es principalmente visual. Para validación matemática exacta dentro/fuera se recomienda complementar la plantilla imagen con un polígono oculto calibrado.

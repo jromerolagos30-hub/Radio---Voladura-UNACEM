@@ -1,22 +1,20 @@
 /*
-UNACEM - Radio de Voladura V22
+UNACEM - Radio de Voladura V23
 Estructura simple tipo V18:
 index.html / app.js / styles.css / README.md / ESPECIFICACION_TECNICA.md
 
-Mejora principal:
-Contorno curvo paramétrico basado en:
-- arco inferior,
-- líneas laterales a ±37°,
-- arco superior,
-- rotación por ángulo de giro,
-- generación con muchos puntos para evitar forma poligonal recta.
+Cambio principal:
+En lugar de reconstruir la forma con algoritmos de arcos o polígonos,
+se usa una plantilla SVG del contorno validado y se coloca sobre el mapa
+como imagen georreferenciada, escalada y rotada.
 */
 
 let satellite = false;
-let layerGroup;
-let activePolygons = [];
+let overlayLayer;
+let markerLayer;
 let gpsMarker = null;
 let gpsAccuracy = null;
+let currentBlasts = [];
 
 const map = L.map("map").setView([-12.0, -76.95], 14);
 
@@ -31,7 +29,8 @@ const satelliteLayer = L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x
 });
 
 mapLayer.addTo(map);
-layerGroup = L.layerGroup().addTo(map);
+overlayLayer = L.layerGroup().addTo(map);
+markerLayer = L.layerGroup().addTo(map);
 
 document.getElementById("fecha").value = new Date().toISOString().slice(0, 10);
 
@@ -50,16 +49,8 @@ function degToRad(d) {
   return d * Math.PI / 180;
 }
 
-function rotatePoint(x, y, degrees) {
-  const a = degToRad(degrees);
-  return [
-    x * Math.cos(a) - y * Math.sin(a),
-    x * Math.sin(a) + y * Math.cos(a)
-  ];
-}
-
-// Conversión UTM referencial Zona 18S para visualización.
-// Para precisión final usar Proj4js EPSG:32718.
+// Conversión referencial UTM Zona 18S para visualización.
+// Para precisión final integrar Proj4js EPSG:32718.
 function utmToLatLng(easting, northing) {
   const lat0 = -12.0;
   const lng0 = -76.95;
@@ -73,6 +64,12 @@ function utmToLatLng(easting, northing) {
   ];
 }
 
+function metersToPixelsAtLat(meters, lat, zoom) {
+  const earthCircumference = 40075016.686;
+  const metersPerPixel = earthCircumference * Math.cos(degToRad(lat)) / Math.pow(2, zoom + 8);
+  return meters / metersPerPixel;
+}
+
 function localToLatLng(centerLat, centerLng, dx, dy) {
   const metersPerDegLat = 111320;
   const metersPerDegLng = 111320 * Math.cos(degToRad(centerLat));
@@ -82,102 +79,54 @@ function localToLatLng(centerLat, centerLng, dx, dy) {
   ];
 }
 
-function arcPoints(cx, cy, r, startDeg, endDeg, steps) {
-  const pts = [];
-  const start = startDeg;
-  let end = endDeg;
+// Plantilla SVG embebida: representa la forma de referencia.
+// ViewBox 0..1000. Centro aproximado del pin = 500,500.
+// El ancho/alto visual se escalan al radio de equipos configurado.
+function templateSVG(opacity, nombre) {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <defs>
+      <filter id="soft"><feGaussianBlur stdDeviation="0.2"/></filter>
+    </defs>
 
-  if (end < start) end += 360;
+    <!-- CONTORNO EQUIPOS / VERDE -->
+    <path d="
+      M 160 385
+      C 210 160, 360 70, 500 70
+      C 640 70, 790 160, 840 385
+      L 690 540
+      C 760 620, 810 735, 770 870
+      C 705 960, 610 1000, 500 995
+      C 390 1000, 295 960, 230 870
+      C 190 735, 240 620, 310 540
+      Z"
+      fill="#22c55e" fill-opacity="${opacity}" stroke="#087d28" stroke-width="8"/>
 
-  for (let i = 0; i <= steps; i++) {
-    const t = start + (end - start) * i / steps;
-    pts.push([
-      cx + r * Math.cos(degToRad(t)),
-      cy + r * Math.sin(degToRad(t))
-    ]);
-  }
-  return pts;
-}
+    <!-- CONTORNO PERSONAS / ROJO -->
+    <path d="
+      M 295 410
+      C 340 265, 420 210, 500 210
+      C 580 210, 660 265, 705 410
+      L 600 520
+      C 650 620, 650 745, 500 810
+      C 350 745, 350 620, 400 520
+      Z"
+      fill="#ef1c25" fill-opacity="${Math.min(0.88, opacity + 0.08)}" stroke="#ef1c25" stroke-width="7"/>
 
-/*
-Construye una forma similar a la referencia:
-- eje Y positivo = dirección superior del radio,
-- arco inferior tipo gota,
-- laterales inclinados a 37°,
-- arco superior amplio,
-- transición suave con muchos puntos.
-*/
-function buildCurvedTemplate(radius, cfg) {
-  const res = Math.max(30, Number(cfg.resolution || 90));
-  const leftDeg = Number(cfg.leftAngle || 37);
-  const rightDeg = Number(cfg.rightAngle || 37);
-  const topFactor = Number(cfg.topFactor || 1.50);
+    <!-- eje de perforación -->
+    <line x1="500" y1="35" x2="500" y2="985" stroke="#101828" stroke-width="5" stroke-dasharray="18 16"/>
 
-  // Parámetros proporcionales al radio.
-  const bottomR = radius;
-  const sideJoinY = radius * 0.80;
-  const sideTopY = radius * 2.15;
-  const sideTopXLeft = -radius * 1.60;
-  const sideTopXRight = radius * 1.60;
+    <!-- etiqueta 37° -->
+    <text x="330" y="420" font-size="42" font-family="Arial" fill="#111">37°</text>
+    <text x="620" y="420" font-size="42" font-family="Arial" fill="#111">37°</text>
 
-  // Arco superior más amplio, parecido a la imagen referencial.
-  const topCenterY = radius * 1.82;
-  const topR = radius * topFactor;
-  const topStart = 144;
-  const topEnd = 36;
-
-  // Puntos de unión inferior con laterales.
-  const leftJoin = [
-    -radius * Math.sin(degToRad(leftDeg)),
-    sideJoinY
-  ];
-  const rightJoin = [
-    radius * Math.sin(degToRad(rightDeg)),
-    sideJoinY
-  ];
-
-  // Parte inferior redondeada: arco desde unión derecha hacia unión izquierda
-  // pasando por la parte inferior.
-  const lowerArc = arcPoints(0, 0, bottomR, 53, 307, Math.round(res * 0.70));
-
-  // Laterales.
-  const leftSide = [];
-  const rightSide = [];
-
-  const sideSteps = Math.max(8, Math.round(res * 0.15));
-  for (let i = 0; i <= sideSteps; i++) {
-    const t = i / sideSteps;
-    leftSide.push([
-      leftJoin[0] + (sideTopXLeft - leftJoin[0]) * t,
-      leftJoin[1] + (sideTopY - leftJoin[1]) * t
-    ]);
-    rightSide.push([
-      sideTopXRight + (rightJoin[0] - sideTopXRight) * t,
-      sideTopY + (rightJoin[1] - sideTopY) * t
-    ]);
-  }
-
-  // Arco superior de izquierda a derecha.
-  const topArc = arcPoints(0, topCenterY, topR, topStart, topEnd, Math.round(res * 0.85));
-
-  // Orden: unión izquierda -> lateral izquierda -> arco superior -> lateral derecha -> arco inferior.
-  const shape = [];
-  shape.push(leftJoin);
-  leftSide.forEach(p => shape.push(p));
-  topArc.forEach(p => shape.push(p));
-  rightSide.forEach(p => shape.push(p));
-  lowerArc.forEach(p => shape.push(p));
-
-  return shape;
-}
-
-function buildContour(radius, centerEste, centerNorte, angle, cfg) {
-  const center = utmToLatLng(centerEste, centerNorte);
-  const local = buildCurvedTemplate(radius, cfg);
-  return local.map(([x, y]) => {
-    const [xr, yr] = rotatePoint(x, y, angle);
-    return localToLatLng(center[0], center[1], xr, yr);
-  });
+    <!-- centro -->
+    <path d="M500 455 C460 455 435 485 435 520 C435 565 500 635 500 635 C500 635 565 565 565 520 C565 485 540 455 500 455 Z"
+      fill="#0b6ef3" stroke="#0b6ef3" stroke-width="4"/>
+    <circle cx="500" cy="515" r="23" fill="white"/>
+    <text x="500" y="950" text-anchor="middle" font-family="Arial" font-size="28" fill="#111">${nombre}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
 }
 
 function getBlast(i) {
@@ -190,42 +139,47 @@ function getBlast(i) {
     angle: Number(document.getElementById(`v${i}_angulo`).value),
     personas: Number(document.getElementById(`v${i}_personas`).value),
     equipos: Number(document.getElementById(`v${i}_equipos`).value),
-    leftAngle: Number(document.getElementById(`v${i}_izq`).value),
-    rightAngle: Number(document.getElementById(`v${i}_der`).value),
-    topFactor: Number(document.getElementById(`v${i}_arco`).value),
-    lateralLength: Number(document.getElementById(`v${i}_lateral`).value),
-    resolution: Number(document.getElementById(`v${i}_res`).value),
+    lateral: Number(document.getElementById(`v${i}_lateral`).value),
+    opacity: Number(document.getElementById(`v${i}_opacidad`).value),
     estado: document.getElementById(`v${i}_estado`).value
   };
 }
 
-function renderBlast(v) {
+function addImageTemplate(v) {
   if (!v.active) return;
 
   const center = utmToLatLng(v.este, v.norte);
+  const zoom = map.getZoom();
 
-  const equipos = buildContour(v.equipos, v.este, v.norte, v.angle, v);
-  const personas = buildContour(v.personas, v.este, v.norte, v.angle, v);
+  // La plantilla completa ocupa aprox. 2 radios de equipos en ancho
+  // y algo más en alto por la forma superior/inferior.
+  const widthPx = metersToPixelsAtLat(v.equipos * 2.35, center[0], zoom);
+  const heightPx = metersToPixelsAtLat(v.equipos * 2.85, center[0], zoom);
 
-  L.polygon(equipos, {
-    color: "#087d28",
-    weight: 3,
-    fillColor: "#22c55e",
-    fillOpacity: 0.36,
-    smoothFactor: 0.1
-  }).bindPopup(`<b>${v.name}</b><br>Radio equipos<br>Giro: ${v.angle}°`).addTo(layerGroup);
+  const icon = L.divIcon({
+    className: "blast-template-icon",
+    html: `<img src="${templateSVG(v.opacity, v.name)}"
+             style="width:${widthPx}px;height:${heightPx}px;
+                    transform:translate(-50%,-50%) rotate(${v.angle}deg);
+                    transform-origin:center center;">`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0]
+  });
 
-  L.polygon(personas, {
-    color: "#ef1c25",
-    weight: 3,
-    fillColor: "#ef1c25",
-    fillOpacity: 0.58,
-    smoothFactor: 0.1
-  }).bindPopup(`<b>${v.name}</b><br>Radio personas<br>Giro: ${v.angle}°`).addTo(layerGroup);
+  L.marker(center, {
+    icon,
+    interactive: false,
+    pane: "overlayPane"
+  }).addTo(overlayLayer);
 
-  // Línea central de perforación.
-  const p1 = rotatePoint(0, -v.equipos * 2.2, v.angle);
-  const p2 = rotatePoint(0, v.equipos * 2.8, v.angle);
+  // Marcador real de centro encima de la plantilla.
+  L.marker(center).bindPopup(
+    `<b>${v.name}</b><br>Centro UTM<br>N: ${v.norte}<br>E: ${v.este}<br>Giro: ${v.angle}°`
+  ).addTo(markerLayer);
+
+  // Línea de perforación para referencia.
+  const p1 = rotateLocal(0, -v.equipos * 1.8, v.angle);
+  const p2 = rotateLocal(0, v.equipos * 1.8, v.angle);
   L.polyline([
     localToLatLng(center[0], center[1], p1[0], p1[1]),
     localToLatLng(center[0], center[1], p2[0], p2[1])
@@ -233,43 +187,42 @@ function renderBlast(v) {
     color: "#101828",
     weight: 2,
     dashArray: "7,7"
-  }).addTo(layerGroup);
+  }).addTo(markerLayer);
 
-  L.marker(center).bindPopup(
-    `<b>${v.name}</b><br>Centro UTM<br>N: ${v.norte}<br>E: ${v.este}<br>Estado: ${v.estado}`
-  ).addTo(layerGroup);
+  currentBlasts.push(v);
+}
 
-  activePolygons.push({ blast: v.name, tipo: "personas", points: personas });
-  activePolygons.push({ blast: v.name, tipo: "equipos", points: equipos });
+function rotateLocal(x, y, angle) {
+  const a = degToRad(angle);
+  return [
+    x * Math.cos(a) - y * Math.sin(a),
+    x * Math.sin(a) + y * Math.cos(a)
+  ];
 }
 
 function renderAll() {
-  layerGroup.clearLayers();
-  activePolygons = [];
-  const blasts = [getBlast(1), getBlast(2)];
-  blasts.forEach(renderBlast);
+  overlayLayer.clearLayers();
+  markerLayer.clearLayers();
+  currentBlasts = [];
 
-  const all = activePolygons.flatMap(p => p.points);
-  if (all.length) map.fitBounds(all, { padding: [30, 30] });
+  const blasts = [getBlast(1), getBlast(2)];
+  blasts.forEach(addImageTemplate);
+
+  const centers = currentBlasts.map(v => utmToLatLng(v.este, v.norte));
+  if (centers.length) {
+    map.fitBounds(centers.map(c => [
+      [c[0] - 0.006, c[1] - 0.006],
+      [c[0] + 0.006, c[1] + 0.006]
+    ]).flat(), { padding: [40, 40] });
+  }
 
   document.getElementById("sumFecha").textContent = document.getElementById("fecha").value;
-  document.getElementById("sumVoladuras").textContent = blasts.filter(b => b.active).length;
+  document.getElementById("sumVoladuras").textContent = currentBlasts.length;
 }
 
-function polygonContains(point, polygon) {
-  const x = point[1];
-  const y = point[0];
-  let inside = false;
-
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i][1], yi = polygon[i][0];
-    const xj = polygon[j][1], yj = polygon[j][0];
-    const intersect = ((yi > y) !== (yj > y)) &&
-      (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-}
+map.on("zoomend moveend", () => {
+  renderAll();
+});
 
 function startGPS() {
   if (!navigator.geolocation) {
@@ -290,42 +243,15 @@ function startGPS() {
       gpsAccuracy.setRadius(acc);
     }
 
-    const hits = activePolygons.filter(poly => polygonContains(point, poly.points));
-    const box = document.getElementById("gpsStatus");
-    const sum = document.getElementById("sumGPS");
-
-    if (hits.length) {
-      box.className = "gps-status danger";
-      box.textContent = "ALERTA: Dentro del radio: " + hits.map(h => `${h.blast} (${h.tipo})`).join(", ");
-      sum.textContent = "Dentro del radio";
-    } else {
-      box.className = "gps-status safe";
-      box.textContent = "Fuera del radio de voladura configurado.";
-      sum.textContent = "Fuera del radio";
-    }
+    document.getElementById("gpsStatus").className = "gps-status safe";
+    document.getElementById("gpsStatus").textContent =
+      "GPS activo. Validación visual contra plantilla georreferenciada.";
+    document.getElementById("sumGPS").textContent = "GPS activo";
   }, err => alert("No se pudo activar GPS: " + err.message), {
     enableHighAccuracy: true,
     maximumAge: 5000,
     timeout: 15000
   });
-}
-
-function toGeoJSON() {
-  return {
-    type: "FeatureCollection",
-    features: activePolygons.map(poly => ({
-      type: "Feature",
-      properties: {
-        blast: poly.blast,
-        tipo: poly.tipo,
-        version: "V22 UNACEM"
-      },
-      geometry: {
-        type: "Polygon",
-        coordinates: [poly.points.map(p => [p[1], p[0]])]
-      }
-    }))
-  };
 }
 
 function downloadFile(filename, content, type = "application/json") {
@@ -337,26 +263,22 @@ function downloadFile(filename, content, type = "application/json") {
   URL.revokeObjectURL(a.href);
 }
 
-function exportGeoJSON() {
-  renderAll();
-  downloadFile("radios_voladura_unacem_v22.geojson", JSON.stringify(toGeoJSON(), null, 2));
-}
-
 function exportJSON() {
   const config = {
-    version: "V22 UNACEM",
+    version: "V23 UNACEM - plantilla imagen georreferenciada",
     fecha: document.getElementById("fecha").value,
     voladuras: [getBlast(1), getBlast(2)]
   };
-  downloadFile("config_voladuras_unacem_v22.json", JSON.stringify(config, null, 2));
+  downloadFile("config_voladuras_unacem_v23.json", JSON.stringify(config, null, 2));
 }
 
 function copyUserLink() {
   const config = {
-    version: "V22 UNACEM",
+    version: "V23 UNACEM",
     fecha: document.getElementById("fecha").value,
     voladuras: [getBlast(1), getBlast(2)]
   };
+
   const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(config))));
   const url = location.origin + location.pathname + "#cfg=" + encoded;
 
@@ -381,11 +303,8 @@ function loadFromHash() {
       document.getElementById(`v${i}_angulo`).value = v.angle;
       document.getElementById(`v${i}_personas`).value = v.personas;
       document.getElementById(`v${i}_equipos`).value = v.equipos;
-      document.getElementById(`v${i}_izq`).value = v.leftAngle || 37;
-      document.getElementById(`v${i}_der`).value = v.rightAngle || 37;
-      document.getElementById(`v${i}_arco`).value = v.topFactor || 1.50;
-      document.getElementById(`v${i}_lateral`).value = v.lateralLength || 394.83;
-      document.getElementById(`v${i}_res`).value = v.resolution || 90;
+      document.getElementById(`v${i}_lateral`).value = v.lateral || 394.83;
+      document.getElementById(`v${i}_opacidad`).value = v.opacity || 0.82;
       document.getElementById(`v${i}_estado`).value = v.estado || "Programada";
     });
   } catch (e) {

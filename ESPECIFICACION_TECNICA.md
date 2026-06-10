@@ -1,61 +1,47 @@
-# Especificación Técnica - V22 UNACEM
+# Especificación Técnica - V23 UNACEM
 
 ## 1. Objetivo
 
-Aproximar el contorno real del radio de voladura de UNACEM usando generación paramétrica de curvas.
+Representar el radio de voladura con mayor fidelidad visual usando una plantilla de imagen georreferenciada.
 
-## 2. Diferencia respecto a versiones previas
+## 2. Método
 
-La V21 utilizaba una plantilla por vértices. Esto generaba lados rectos y pérdida de forma.
-
-La V22 utiliza:
-
-- arco inferior,
-- dos líneas laterales a ±37°,
-- arco superior,
-- resolución configurable,
-- rotación por ángulo,
-- traslado al centro UTM.
-
-## 3. Campos nuevos
+La versión V23 utiliza:
 
 ```text
-Ángulo lateral izquierdo
-Ángulo lateral derecho
-Factor arco superior
-Longitud lateral referencial
-Resolución del contorno
+SVG del contorno referencial
+Centro UTM
+Escala por radio de equipos
+Rotación por ángulo de giro
+Overlay sobre mapa Leaflet
 ```
 
-## 4. Algoritmo
+## 3. Motivo del cambio
 
-1. Leer centro UTM y parámetros.
-2. Crear arco inferior con múltiples puntos.
-3. Crear línea lateral izquierda.
-4. Crear arco superior con múltiples puntos.
-5. Crear línea lateral derecha.
-6. Unir puntos.
-7. Rotar todo por el ángulo de giro.
-8. Convertir a Lat/Lng.
-9. Dibujar con Leaflet `L.polygon()`.
+Las versiones anteriores generaban el contorno mediante:
 
-## 5. Recomendación de ajuste
+- puntos,
+- polígonos,
+- arcos paramétricos.
 
-Para suavizar más el contorno:
+Sin embargo, el resultado no coincidía visualmente con el estándar gráfico entregado.
 
-```text
-Resolución = 120 o 150
-```
+## 4. Funcionamiento
 
-Para ampliar o reducir el arco superior:
+1. El administrador ingresa centro UTM.
+2. Define radio de personas y equipos.
+3. Define ángulo de giro.
+4. El sistema genera una plantilla SVG.
+5. La plantilla se coloca sobre el centro de voladura.
+6. La plantilla se escala según el radio de equipos.
+7. La plantilla se rota según el ángulo de perforación.
 
-```text
-Factor arco superior = 1.40 a 1.70
-```
+## 5. Recomendación final
 
-Para mantener el estándar referencial:
+Para una versión productiva, se recomienda:
 
 ```text
-Ángulo lateral = 37°
-Longitud lateral = 394.83 m
+- Usar PNG/SVG oficial del contorno validado.
+- Calibrar ancho y alto con 300 m y 394.83 m.
+- Mantener un polígono oculto para cálculo dentro/fuera.
 ```

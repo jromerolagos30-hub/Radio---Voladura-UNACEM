@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>UNACEM | Radio de Voladura V22</title>
+  <title>UNACEM | Radio de Voladura V23</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="styles.css"/>
 </head>
@@ -42,7 +42,7 @@
       <header class="topbar">
         <div>
           <h2>MAPA DE RADIOS DE VOLADURA</h2>
-          <small>V22 - Contorno curvo paramétrico: arcos + líneas + giro</small>
+          <small>V23 - Imagen plantilla georreferenciada + escala + rotación</small>
         </div>
         <div class="top-controls">
           <label>Fecha <input id="fecha" type="date"></label>
@@ -69,11 +69,8 @@
             <label>Ángulo de giro / perforación (°) <input id="v1_angulo" type="number" value="15" step="0.1"></label>
             <label>Radio personas (m) <input id="v1_personas" type="number" value="150"></label>
             <label>Radio equipos (m) <input id="v1_equipos" type="number" value="300"></label>
-            <label>Ángulo lateral izquierdo (°) <input id="v1_izq" type="number" value="37"></label>
-            <label>Ángulo lateral derecho (°) <input id="v1_der" type="number" value="37"></label>
-            <label>Factor arco superior <input id="v1_arco" type="number" value="1.50" step="0.05"></label>
-            <label>Longitud lateral referencial (m) <input id="v1_lateral" type="number" value="394.83" step="0.01"></label>
-            <label>Resolución de curva <input id="v1_res" type="number" value="90"></label>
+            <label>Dimensión lateral referencial (m) <input id="v1_lateral" type="number" value="394.83" step="0.01"></label>
+            <label>Opacidad plantilla <input id="v1_opacidad" type="number" value="0.82" step="0.05" min="0.1" max="1"></label>
             <label>Estado
               <select id="v1_estado">
                 <option>Programada</option>
@@ -93,11 +90,8 @@
             <label>Ángulo de giro / perforación (°) <input id="v2_angulo" type="number" value="195" step="0.1"></label>
             <label>Radio personas (m) <input id="v2_personas" type="number" value="150"></label>
             <label>Radio equipos (m) <input id="v2_equipos" type="number" value="300"></label>
-            <label>Ángulo lateral izquierdo (°) <input id="v2_izq" type="number" value="37"></label>
-            <label>Ángulo lateral derecho (°) <input id="v2_der" type="number" value="37"></label>
-            <label>Factor arco superior <input id="v2_arco" type="number" value="1.50" step="0.05"></label>
-            <label>Longitud lateral referencial (m) <input id="v2_lateral" type="number" value="394.83" step="0.01"></label>
-            <label>Resolución de curva <input id="v2_res" type="number" value="90"></label>
+            <label>Dimensión lateral referencial (m) <input id="v2_lateral" type="number" value="394.83" step="0.01"></label>
+            <label>Opacidad plantilla <input id="v2_opacidad" type="number" value="0.82" step="0.05" min="0.1" max="1"></label>
             <label>Estado
               <select id="v2_estado">
                 <option>Programada</option>
@@ -109,9 +103,8 @@
             <label class="check"><input id="v2_activa" type="checkbox" checked> Mostrar en mapa</label>
           </div>
 
-          <button class="primary" onclick="renderAll()">Actualizar contornos</button>
+          <button class="primary" onclick="renderAll()">Actualizar plantilla</button>
           <button onclick="startGPS()">Activar GPS</button>
-          <button onclick="exportGeoJSON()">Descargar GeoJSON</button>
           <button onclick="exportJSON()">Descargar configuración</button>
         </aside>
       </section>
@@ -119,7 +112,7 @@
       <section class="summary">
         <div><strong>Fecha</strong><br><span id="sumFecha">--</span></div>
         <div><strong>Voladuras programadas</strong><br><span id="sumVoladuras">--</span></div>
-        <div><strong>Modelo geométrico</strong><br>Arcos + líneas + rotación</div>
+        <div><strong>Modelo geométrico</strong><br>Imagen + escala + rotación</div>
         <div><strong>Estado GPS</strong><br><span id="sumGPS">Pendiente</span></div>
       </section>
     </main>
