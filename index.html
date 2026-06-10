@@ -1,3 +1,131 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>UNACEM | Radio de Voladura V21 Final</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><link rel="stylesheet" href="styles.css"/></head>
-<body><div class="app"><aside class="sidebar"><div class="brand"><div class="logo">U</div><div><h1>UNACEM</h1><p>RADIO DE VOLADURA</p></div></div><nav><button class="nav-btn active">Dashboard</button><button class="nav-btn">Voladuras</button><button class="nav-btn">Mapa en vivo</button><button class="nav-btn">Reportes</button><button class="nav-btn">Alertas</button><button class="nav-btn">Historial</button><button class="nav-btn">Usuarios</button><button class="nav-btn">Configuración</button></nav><section class="legend"><h3>LEYENDA</h3><p><span class="dot red"></span> Sector de riesgo para personas</p><p><span class="dot green"></span> Radio de evacuación de equipos</p><p><span class="dot blue"></span> Centro de voladura</p><p><span class="dash"></span> Dirección de línea de perforación</p></section></aside><main><header class="topbar"><div><h2>MAPA DE RADIOS DE VOLADURA</h2><small>V21 FINAL UNACEM - Contorno real por polígono + giro por ángulo</small></div><div class="top-controls"><label>Fecha <input id="fecha" type="date"></label><button onclick="toggleMap()">Vista Satelital / Mapa</button><button onclick="copyUserLink()">Copiar enlace usuario</button></div></header><section class="content"><section class="map-section"><div id="map"></div><div class="scale">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;300 m</div><div id="gpsStatus" class="gps-status">Active el GPS para validar ubicación.</div></section><aside class="control-panel"><h3>VOLADURAS DEL DÍA</h3><div class="blast-card"><div class="blast-head"><strong>VOLADURA 1</strong><span>ACTIVA</span></div><label>Nombre <input id="v1_nombre" value="VOLADURA 1"></label><label>Centro UTM Norte <input id="v1_norte" type="number" value="8678543.32" step="0.01"></label><label>Centro UTM Este <input id="v1_este" type="number" value="368543.21" step="0.01"></label><label>Ángulo de giro (°) <input id="v1_angulo" type="number" value="15" step="0.1"></label><label>Radio personas (m) <input id="v1_personas" type="number" value="150"></label><label>Radio equipos (m) <input id="v1_equipos" type="number" value="300"></label><label>Estado <select id="v1_estado"><option>Programada</option><option>En curso</option><option>Ejecutada</option><option>Cancelada</option></select></label><label class="check"><input id="v1_activa" type="checkbox" checked> Mostrar en mapa</label></div><div class="blast-card"><div class="blast-head"><strong>VOLADURA 2</strong><span>ACTIVA</span></div><label>Nombre <input id="v2_nombre" value="VOLADURA 2"></label><label>Centro UTM Norte <input id="v2_norte" type="number" value="8677125.66" step="0.01"></label><label>Centro UTM Este <input id="v2_este" type="number" value="368451.23" step="0.01"></label><label>Ángulo de giro (°) <input id="v2_angulo" type="number" value="195" step="0.1"></label><label>Radio personas (m) <input id="v2_personas" type="number" value="150"></label><label>Radio equipos (m) <input id="v2_equipos" type="number" value="300"></label><label>Estado <select id="v2_estado"><option>Programada</option><option>En curso</option><option>Ejecutada</option><option>Cancelada</option></select></label><label class="check"><input id="v2_activa" type="checkbox" checked> Mostrar en mapa</label></div><button class="primary" onclick="renderAll()">Actualizar</button><button onclick="startGPS()">Activar GPS</button><button onclick="exportGeoJSON()">Descargar GeoJSON</button><button onclick="exportJSON()">Descargar configuración</button></aside></section><section class="summary"><div><strong>Fecha</strong><br><span id="sumFecha">--</span></div><div><strong>Voladuras programadas</strong><br><span id="sumVoladuras">2</span></div><div><strong>Contorno</strong><br>Real UNACEM por polígonos</div><div><strong>Estado GPS</strong><br><span id="sumGPS">Pendiente</span></div></section></main></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="app.js"></script></body></html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>UNACEM | Radio de Voladura V22</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="shield">U</div>
+        <div>
+          <h1>UNACEM</h1>
+          <p>RADIO DE VOLADURA</p>
+        </div>
+      </div>
+
+      <nav>
+        <button class="active">Dashboard</button>
+        <button>Voladuras</button>
+        <button>Mapa en vivo</button>
+        <button>Reportes</button>
+        <button>Alertas</button>
+        <button>Historial</button>
+        <button>Usuarios</button>
+        <button>Configuración</button>
+      </nav>
+
+      <section class="legend">
+        <h3>LEYENDA</h3>
+        <p><span class="dot red"></span> Radio personas / zona roja</p>
+        <p><span class="dot green"></span> Radio equipos / zona verde</p>
+        <p><span class="dot blue"></span> Centro de voladura</p>
+        <p><span class="dash"></span> Dirección de perforación</p>
+      </section>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h2>MAPA DE RADIOS DE VOLADURA</h2>
+          <small>V22 - Contorno curvo paramétrico: arcos + líneas + giro</small>
+        </div>
+        <div class="top-controls">
+          <label>Fecha <input id="fecha" type="date"></label>
+          <button onclick="toggleBaseMap()">Vista Satelital / Mapa</button>
+          <button onclick="copyUserLink()">Copiar enlace usuario</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <section class="map-card">
+          <div id="map"></div>
+          <div class="scale">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;300 m</div>
+          <div id="gpsStatus" class="gps-status">Active GPS para validar ubicación.</div>
+        </section>
+
+        <aside class="panel">
+          <h3>VOLADURAS DEL DÍA</h3>
+
+          <div class="blast-card">
+            <div class="blast-title"><strong>VOLADURA 1</strong><span>ACTIVA</span></div>
+            <label>Nombre <input id="v1_nombre" value="VOLADURA 1"></label>
+            <label>Centro UTM Norte <input id="v1_norte" type="number" value="8678543.32" step="0.01"></label>
+            <label>Centro UTM Este <input id="v1_este" type="number" value="368543.21" step="0.01"></label>
+            <label>Ángulo de giro / perforación (°) <input id="v1_angulo" type="number" value="15" step="0.1"></label>
+            <label>Radio personas (m) <input id="v1_personas" type="number" value="150"></label>
+            <label>Radio equipos (m) <input id="v1_equipos" type="number" value="300"></label>
+            <label>Ángulo lateral izquierdo (°) <input id="v1_izq" type="number" value="37"></label>
+            <label>Ángulo lateral derecho (°) <input id="v1_der" type="number" value="37"></label>
+            <label>Factor arco superior <input id="v1_arco" type="number" value="1.50" step="0.05"></label>
+            <label>Longitud lateral referencial (m) <input id="v1_lateral" type="number" value="394.83" step="0.01"></label>
+            <label>Resolución de curva <input id="v1_res" type="number" value="90"></label>
+            <label>Estado
+              <select id="v1_estado">
+                <option>Programada</option>
+                <option>En curso</option>
+                <option>Ejecutada</option>
+                <option>Cancelada</option>
+              </select>
+            </label>
+            <label class="check"><input id="v1_activa" type="checkbox" checked> Mostrar en mapa</label>
+          </div>
+
+          <div class="blast-card">
+            <div class="blast-title"><strong>VOLADURA 2</strong><span>ACTIVA</span></div>
+            <label>Nombre <input id="v2_nombre" value="VOLADURA 2"></label>
+            <label>Centro UTM Norte <input id="v2_norte" type="number" value="8677125.66" step="0.01"></label>
+            <label>Centro UTM Este <input id="v2_este" type="number" value="368451.23" step="0.01"></label>
+            <label>Ángulo de giro / perforación (°) <input id="v2_angulo" type="number" value="195" step="0.1"></label>
+            <label>Radio personas (m) <input id="v2_personas" type="number" value="150"></label>
+            <label>Radio equipos (m) <input id="v2_equipos" type="number" value="300"></label>
+            <label>Ángulo lateral izquierdo (°) <input id="v2_izq" type="number" value="37"></label>
+            <label>Ángulo lateral derecho (°) <input id="v2_der" type="number" value="37"></label>
+            <label>Factor arco superior <input id="v2_arco" type="number" value="1.50" step="0.05"></label>
+            <label>Longitud lateral referencial (m) <input id="v2_lateral" type="number" value="394.83" step="0.01"></label>
+            <label>Resolución de curva <input id="v2_res" type="number" value="90"></label>
+            <label>Estado
+              <select id="v2_estado">
+                <option>Programada</option>
+                <option>En curso</option>
+                <option>Ejecutada</option>
+                <option>Cancelada</option>
+              </select>
+            </label>
+            <label class="check"><input id="v2_activa" type="checkbox" checked> Mostrar en mapa</label>
+          </div>
+
+          <button class="primary" onclick="renderAll()">Actualizar contornos</button>
+          <button onclick="startGPS()">Activar GPS</button>
+          <button onclick="exportGeoJSON()">Descargar GeoJSON</button>
+          <button onclick="exportJSON()">Descargar configuración</button>
+        </aside>
+      </section>
+
+      <section class="summary">
+        <div><strong>Fecha</strong><br><span id="sumFecha">--</span></div>
+        <div><strong>Voladuras programadas</strong><br><span id="sumVoladuras">--</span></div>
+        <div><strong>Modelo geométrico</strong><br>Arcos + líneas + rotación</div>
+        <div><strong>Estado GPS</strong><br><span id="sumGPS">Pendiente</span></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

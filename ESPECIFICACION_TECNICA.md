@@ -1,38 +1,61 @@
-# Especificación Técnica - V21 FINAL UNACEM
+# Especificación Técnica - V22 UNACEM
 
-## Objetivo
+## 1. Objetivo
 
-Generar el contorno real del radio de voladura UNACEM utilizando plantilla geométrica, rotación y georreferenciación referencial.
+Aproximar el contorno real del radio de voladura de UNACEM usando generación paramétrica de curvas.
 
-## Datos por voladura
+## 2. Diferencia respecto a versiones previas
 
-- Nombre
-- Centro UTM Norte
-- Centro UTM Este
-- Ángulo de giro
-- Radio personas
-- Radio equipos
-- Estado
+La V21 utilizaba una plantilla por vértices. Esto generaba lados rectos y pérdida de forma.
 
-## Plantilla personas R=150
+La V22 utiliza:
 
-[-90,120], [-240,320], [-155,410], [0,450], [155,410], [240,320], [90,120], [150,-150], [0,-300], [-150,-150]
+- arco inferior,
+- dos líneas laterales a ±37°,
+- arco superior,
+- resolución configurable,
+- rotación por ángulo,
+- traslado al centro UTM.
 
-## Plantilla equipos R=300
+## 3. Campos nuevos
 
-[-180,240], [-420,560], [-260,700], [0,730], [260,700], [420,560], [180,240], [300,-300], [0,-600], [-300,-300]
+```text
+Ángulo lateral izquierdo
+Ángulo lateral derecho
+Factor arco superior
+Longitud lateral referencial
+Resolución del contorno
+```
 
-## Fórmula de rotación
+## 4. Algoritmo
 
-x’ = x cos θ - y sin θ
-y’ = x sin θ + y cos θ
+1. Leer centro UTM y parámetros.
+2. Crear arco inferior con múltiples puntos.
+3. Crear línea lateral izquierda.
+4. Crear arco superior con múltiples puntos.
+5. Crear línea lateral derecha.
+6. Unir puntos.
+7. Rotar todo por el ángulo de giro.
+8. Convertir a Lat/Lng.
+9. Dibujar con Leaflet `L.polygon()`.
 
-## Algoritmo
+## 5. Recomendación de ajuste
 
-1. Leer datos de voladura.
-2. Escalar plantilla según radio.
-3. Rotar por ángulo.
-4. Trasladar al centro UTM.
-5. Convertir a Lat/Lng.
-6. Dibujar con L.polygon.
-7. Validar GPS con punto-en-polígono.
+Para suavizar más el contorno:
+
+```text
+Resolución = 120 o 150
+```
+
+Para ampliar o reducir el arco superior:
+
+```text
+Factor arco superior = 1.40 a 1.70
+```
+
+Para mantener el estándar referencial:
+
+```text
+Ángulo lateral = 37°
+Longitud lateral = 394.83 m
+```
