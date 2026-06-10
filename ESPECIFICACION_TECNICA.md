@@ -1,47 +1,21 @@
-# Especificación Técnica - V23 UNACEM
+# Especificación Técnica - V24 UNACEM
 
-## 1. Objetivo
+## Objetivo
 
-Representar el radio de voladura con mayor fidelidad visual usando una plantilla de imagen georreferenciada.
+Usar la imagen real del contorno de voladura como plantilla georreferenciada.
 
-## 2. Método
+## Método
 
-La versión V23 utiliza:
+1. Se genera un PNG transparente del contorno real.
+2. El PNG se posiciona sobre el centro UTM.
+3. El centro del pin se usa como punto de anclaje.
+4. La imagen se escala según el radio de equipos.
+5. La imagen se rota según el ángulo de giro.
 
-```text
-SVG del contorno referencial
-Centro UTM
-Escala por radio de equipos
-Rotación por ángulo de giro
-Overlay sobre mapa Leaflet
-```
+## Ventaja
 
-## 3. Motivo del cambio
+La forma visual coincide con el contorno validado, evitando errores por reconstrucción matemática.
 
-Las versiones anteriores generaban el contorno mediante:
+## Nota
 
-- puntos,
-- polígonos,
-- arcos paramétricos.
-
-Sin embargo, el resultado no coincidía visualmente con el estándar gráfico entregado.
-
-## 4. Funcionamiento
-
-1. El administrador ingresa centro UTM.
-2. Define radio de personas y equipos.
-3. Define ángulo de giro.
-4. El sistema genera una plantilla SVG.
-5. La plantilla se coloca sobre el centro de voladura.
-6. La plantilla se escala según el radio de equipos.
-7. La plantilla se rota según el ángulo de perforación.
-
-## 5. Recomendación final
-
-Para una versión productiva, se recomienda:
-
-```text
-- Usar PNG/SVG oficial del contorno validado.
-- Calibrar ancho y alto con 300 m y 394.83 m.
-- Mantener un polígono oculto para cálculo dentro/fuera.
-```
+La validación GPS es visual. Para una validación matemática exacta se debe agregar un polígono oculto calibrado.

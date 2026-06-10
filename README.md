@@ -1,6 +1,8 @@
-# Radio de Voladura UNACEM - V23
+# Radio de Voladura UNACEM - V24
 
-Versión con estructura simple igual a la V18:
+Versión con la imagen verdadera del contorno referencial.
+
+## Estructura
 
 ```text
 index.html
@@ -8,41 +10,34 @@ app.js
 styles.css
 README.md
 ESPECIFICACION_TECNICA.md
+contorno_unacem_real.png
 ```
 
 ## Cambio principal
 
-La V23 deja de intentar reconstruir el contorno mediante polígonos o arcos matemáticos.
+La V24 usa el contorno real como PNG transparente. No intenta reconstruir la forma con polígonos ni arcos.
 
-Ahora usa una **imagen SVG plantilla** del contorno referencial y la coloca sobre el mapa como:
+El sistema aplica:
 
 ```text
-Imagen georreferenciada + escala + rotación
+Centro UTM + escala + rotación
 ```
 
-## Ventaja
+## Uso
 
-Visualmente se aproxima mucho más al contorno aprobado, porque se controla la forma como imagen y no como cálculo geométrico imperfecto.
-
-## Campos por voladura
-
-- Nombre.
-- Centro UTM Norte.
-- Centro UTM Este.
-- Ángulo de giro / línea de perforación.
-- Radio personas.
-- Radio equipos.
-- Dimensión lateral referencial 394.83 m.
-- Opacidad de plantilla.
-- Estado.
-- Activo / inactivo.
-
-## Uso en GitHub Pages
-
-1. Subir los 5 archivos a la raíz del repositorio.
+1. Subir todos los archivos al repositorio GitHub.
 2. Activar GitHub Pages.
 3. Abrir `index.html`.
+4. Configurar centro UTM y ángulo de giro.
+5. Presionar `Actualizar plantilla`.
 
-## Nota
+## Ajuste visual
 
-La validación GPS en esta versión es principalmente visual. Para validación matemática exacta dentro/fuera se recomienda complementar la plantilla imagen con un polígono oculto calibrado.
+Los campos:
+
+```text
+Ancho visual relativo
+Alto visual relativo
+```
+
+permiten calibrar la escala del PNG sobre el mapa.

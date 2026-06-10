@@ -1,12 +1,7 @@
 /*
-UNACEM - Radio de Voladura V23
-Estructura simple tipo V18:
-index.html / app.js / styles.css / README.md / ESPECIFICACION_TECNICA.md
-
-Cambio principal:
-En lugar de reconstruir la forma con algoritmos de arcos o polígonos,
-se usa una plantilla SVG del contorno validado y se coloca sobre el mapa
-como imagen georreferenciada, escalada y rotada.
+UNACEM - Radio de Voladura V24
+La forma real ya no se dibuja: se usa la imagen verdadera del contorno
+como PNG transparente y se aplica escala, rotación y centro UTM.
 */
 
 let satellite = false;
@@ -15,6 +10,7 @@ let markerLayer;
 let gpsMarker = null;
 let gpsAccuracy = null;
 let currentBlasts = [];
+let isRendering = false;
 
 const map = L.map("map").setView([-12.0, -76.95], 14);
 
@@ -31,7 +27,6 @@ const satelliteLayer = L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x
 mapLayer.addTo(map);
 overlayLayer = L.layerGroup().addTo(map);
 markerLayer = L.layerGroup().addTo(map);
-
 document.getElementById("fecha").value = new Date().toISOString().slice(0, 10);
 
 function toggleBaseMap() {
@@ -49,8 +44,6 @@ function degToRad(d) {
   return d * Math.PI / 180;
 }
 
-// Conversión referencial UTM Zona 18S para visualización.
-// Para precisión final integrar Proj4js EPSG:32718.
 function utmToLatLng(easting, northing) {
   const lat0 = -12.0;
   const lng0 = -76.95;
@@ -79,54 +72,12 @@ function localToLatLng(centerLat, centerLng, dx, dy) {
   ];
 }
 
-// Plantilla SVG embebida: representa la forma de referencia.
-// ViewBox 0..1000. Centro aproximado del pin = 500,500.
-// El ancho/alto visual se escalan al radio de equipos configurado.
-function templateSVG(opacity, nombre) {
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
-    <defs>
-      <filter id="soft"><feGaussianBlur stdDeviation="0.2"/></filter>
-    </defs>
-
-    <!-- CONTORNO EQUIPOS / VERDE -->
-    <path d="
-      M 160 385
-      C 210 160, 360 70, 500 70
-      C 640 70, 790 160, 840 385
-      L 690 540
-      C 760 620, 810 735, 770 870
-      C 705 960, 610 1000, 500 995
-      C 390 1000, 295 960, 230 870
-      C 190 735, 240 620, 310 540
-      Z"
-      fill="#22c55e" fill-opacity="${opacity}" stroke="#087d28" stroke-width="8"/>
-
-    <!-- CONTORNO PERSONAS / ROJO -->
-    <path d="
-      M 295 410
-      C 340 265, 420 210, 500 210
-      C 580 210, 660 265, 705 410
-      L 600 520
-      C 650 620, 650 745, 500 810
-      C 350 745, 350 620, 400 520
-      Z"
-      fill="#ef1c25" fill-opacity="${Math.min(0.88, opacity + 0.08)}" stroke="#ef1c25" stroke-width="7"/>
-
-    <!-- eje de perforación -->
-    <line x1="500" y1="35" x2="500" y2="985" stroke="#101828" stroke-width="5" stroke-dasharray="18 16"/>
-
-    <!-- etiqueta 37° -->
-    <text x="330" y="420" font-size="42" font-family="Arial" fill="#111">37°</text>
-    <text x="620" y="420" font-size="42" font-family="Arial" fill="#111">37°</text>
-
-    <!-- centro -->
-    <path d="M500 455 C460 455 435 485 435 520 C435 565 500 635 500 635 C500 635 565 565 565 520 C565 485 540 455 500 455 Z"
-      fill="#0b6ef3" stroke="#0b6ef3" stroke-width="4"/>
-    <circle cx="500" cy="515" r="23" fill="white"/>
-    <text x="500" y="950" text-anchor="middle" font-family="Arial" font-size="28" fill="#111">${nombre}</text>
-  </svg>`;
-  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+function rotateLocal(x, y, angle) {
+  const a = degToRad(angle);
+  return [
+    x * Math.cos(a) - y * Math.sin(a),
+    x * Math.sin(a) + y * Math.cos(a)
+  ];
 }
 
 function getBlast(i) {
@@ -137,49 +88,56 @@ function getBlast(i) {
     norte: Number(document.getElementById(`v${i}_norte`).value),
     este: Number(document.getElementById(`v${i}_este`).value),
     angle: Number(document.getElementById(`v${i}_angulo`).value),
-    personas: Number(document.getElementById(`v${i}_personas`).value),
     equipos: Number(document.getElementById(`v${i}_equipos`).value),
-    lateral: Number(document.getElementById(`v${i}_lateral`).value),
+    widthFactor: Number(document.getElementById(`v${i}_ancho`).value),
+    heightFactor: Number(document.getElementById(`v${i}_alto`).value),
     opacity: Number(document.getElementById(`v${i}_opacidad`).value),
     estado: document.getElementById(`v${i}_estado`).value
   };
 }
 
-function addImageTemplate(v) {
+function addRealContourImage(v) {
   if (!v.active) return;
 
   const center = utmToLatLng(v.este, v.norte);
   const zoom = map.getZoom();
 
-  // La plantilla completa ocupa aprox. 2 radios de equipos en ancho
-  // y algo más en alto por la forma superior/inferior.
-  const widthPx = metersToPixelsAtLat(v.equipos * 2.35, center[0], zoom);
-  const heightPx = metersToPixelsAtLat(v.equipos * 2.85, center[0], zoom);
+  const widthPx = metersToPixelsAtLat(v.equipos * v.widthFactor, center[0], zoom);
+  const heightPx = metersToPixelsAtLat(v.equipos * v.heightFactor, center[0], zoom);
+
+  const t = window.UNACEM_TEMPLATE;
+  const html = `
+    <img src="${t.file}"
+         style="
+          width:${widthPx}px;
+          height:${heightPx}px;
+          opacity:${v.opacity};
+          transform:
+            translate(-${t.pinXPct}%, -${t.pinYPct}%)
+            rotate(${v.angle}deg);
+          transform-origin:${t.pinXPct}% ${t.pinYPct}%;
+          pointer-events:none;
+         ">`;
 
   const icon = L.divIcon({
     className: "blast-template-icon",
-    html: `<img src="${templateSVG(v.opacity, v.name)}"
-             style="width:${widthPx}px;height:${heightPx}px;
-                    transform:translate(-50%,-50%) rotate(${v.angle}deg);
-                    transform-origin:center center;">`,
+    html,
     iconSize: [0, 0],
     iconAnchor: [0, 0]
   });
 
   L.marker(center, {
     icon,
-    interactive: false,
-    pane: "overlayPane"
+    interactive: false
   }).addTo(overlayLayer);
 
-  // Marcador real de centro encima de la plantilla.
   L.marker(center).bindPopup(
     `<b>${v.name}</b><br>Centro UTM<br>N: ${v.norte}<br>E: ${v.este}<br>Giro: ${v.angle}°`
   ).addTo(markerLayer);
 
-  // Línea de perforación para referencia.
-  const p1 = rotateLocal(0, -v.equipos * 1.8, v.angle);
-  const p2 = rotateLocal(0, v.equipos * 1.8, v.angle);
+  const p1 = rotateLocal(0, -v.equipos * 1.7, v.angle);
+  const p2 = rotateLocal(0, v.equipos * 1.7, v.angle);
+
   L.polyline([
     localToLatLng(center[0], center[1], p1[0], p1[1]),
     localToLatLng(center[0], center[1], p2[0], p2[1])
@@ -192,36 +150,38 @@ function addImageTemplate(v) {
   currentBlasts.push(v);
 }
 
-function rotateLocal(x, y, angle) {
-  const a = degToRad(angle);
-  return [
-    x * Math.cos(a) - y * Math.sin(a),
-    x * Math.sin(a) + y * Math.cos(a)
-  ];
-}
-
 function renderAll() {
+  if (isRendering) return;
+  isRendering = true;
+
   overlayLayer.clearLayers();
   markerLayer.clearLayers();
   currentBlasts = [];
 
   const blasts = [getBlast(1), getBlast(2)];
-  blasts.forEach(addImageTemplate);
+  blasts.forEach(addRealContourImage);
 
   const centers = currentBlasts.map(v => utmToLatLng(v.este, v.norte));
-  if (centers.length) {
-    map.fitBounds(centers.map(c => [
+  if (centers.length && !map._fittedOnce) {
+    const expanded = centers.flatMap(c => [
       [c[0] - 0.006, c[1] - 0.006],
       [c[0] + 0.006, c[1] + 0.006]
-    ]).flat(), { padding: [40, 40] });
+    ]);
+    map.fitBounds(expanded, { padding: [40, 40] });
+    map._fittedOnce = true;
   }
 
   document.getElementById("sumFecha").textContent = document.getElementById("fecha").value;
   document.getElementById("sumVoladuras").textContent = currentBlasts.length;
+
+  isRendering = false;
 }
 
-map.on("zoomend moveend", () => {
-  renderAll();
+map.on("zoomend", () => {
+  overlayLayer.clearLayers();
+  markerLayer.clearLayers();
+  currentBlasts = [];
+  [getBlast(1), getBlast(2)].forEach(addRealContourImage);
 });
 
 function startGPS() {
@@ -245,7 +205,7 @@ function startGPS() {
 
     document.getElementById("gpsStatus").className = "gps-status safe";
     document.getElementById("gpsStatus").textContent =
-      "GPS activo. Validación visual contra plantilla georreferenciada.";
+      "GPS activo. Validación visual sobre contorno real georreferenciado.";
     document.getElementById("sumGPS").textContent = "GPS activo";
   }, err => alert("No se pudo activar GPS: " + err.message), {
     enableHighAccuracy: true,
@@ -265,20 +225,19 @@ function downloadFile(filename, content, type = "application/json") {
 
 function exportJSON() {
   const config = {
-    version: "V23 UNACEM - plantilla imagen georreferenciada",
+    version: "V24 UNACEM - contorno real PNG",
     fecha: document.getElementById("fecha").value,
     voladuras: [getBlast(1), getBlast(2)]
   };
-  downloadFile("config_voladuras_unacem_v23.json", JSON.stringify(config, null, 2));
+  downloadFile("config_voladuras_unacem_v24.json", JSON.stringify(config, null, 2));
 }
 
 function copyUserLink() {
   const config = {
-    version: "V23 UNACEM",
+    version: "V24 UNACEM",
     fecha: document.getElementById("fecha").value,
     voladuras: [getBlast(1), getBlast(2)]
   };
-
   const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(config))));
   const url = location.origin + location.pathname + "#cfg=" + encoded;
 
@@ -301,10 +260,10 @@ function loadFromHash() {
       document.getElementById(`v${i}_norte`).value = v.norte;
       document.getElementById(`v${i}_este`).value = v.este;
       document.getElementById(`v${i}_angulo`).value = v.angle;
-      document.getElementById(`v${i}_personas`).value = v.personas;
       document.getElementById(`v${i}_equipos`).value = v.equipos;
-      document.getElementById(`v${i}_lateral`).value = v.lateral || 394.83;
-      document.getElementById(`v${i}_opacidad`).value = v.opacity || 0.82;
+      document.getElementById(`v${i}_ancho`).value = v.widthFactor || 2.05;
+      document.getElementById(`v${i}_alto`).value = v.heightFactor || 2.20;
+      document.getElementById(`v${i}_opacidad`).value = v.opacity || 0.92;
       document.getElementById(`v${i}_estado`).value = v.estado || "Programada";
     });
   } catch (e) {

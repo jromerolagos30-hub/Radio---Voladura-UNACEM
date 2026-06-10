@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>UNACEM | Radio de Voladura V23</title>
+  <title>UNACEM | Radio de Voladura V24</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="styles.css"/>
 </head>
@@ -42,7 +42,7 @@
       <header class="topbar">
         <div>
           <h2>MAPA DE RADIOS DE VOLADURA</h2>
-          <small>V23 - Imagen plantilla georreferenciada + escala + rotación</small>
+          <small>V24 - Contorno real UNACEM como imagen transparente + escala + rotación</small>
         </div>
         <div class="top-controls">
           <label>Fecha <input id="fecha" type="date"></label>
@@ -67,10 +67,10 @@
             <label>Centro UTM Norte <input id="v1_norte" type="number" value="8678543.32" step="0.01"></label>
             <label>Centro UTM Este <input id="v1_este" type="number" value="368543.21" step="0.01"></label>
             <label>Ángulo de giro / perforación (°) <input id="v1_angulo" type="number" value="15" step="0.1"></label>
-            <label>Radio personas (m) <input id="v1_personas" type="number" value="150"></label>
-            <label>Radio equipos (m) <input id="v1_equipos" type="number" value="300"></label>
-            <label>Dimensión lateral referencial (m) <input id="v1_lateral" type="number" value="394.83" step="0.01"></label>
-            <label>Opacidad plantilla <input id="v1_opacidad" type="number" value="0.82" step="0.05" min="0.1" max="1"></label>
+            <label>Radio equipos referencia (m) <input id="v1_equipos" type="number" value="300"></label>
+            <label>Ancho visual relativo <input id="v1_ancho" type="number" value="2.05" step="0.05"></label>
+            <label>Alto visual relativo <input id="v1_alto" type="number" value="2.20" step="0.05"></label>
+            <label>Opacidad plantilla <input id="v1_opacidad" type="number" value="0.92" step="0.05" min="0.1" max="1"></label>
             <label>Estado
               <select id="v1_estado">
                 <option>Programada</option>
@@ -88,10 +88,10 @@
             <label>Centro UTM Norte <input id="v2_norte" type="number" value="8677125.66" step="0.01"></label>
             <label>Centro UTM Este <input id="v2_este" type="number" value="368451.23" step="0.01"></label>
             <label>Ángulo de giro / perforación (°) <input id="v2_angulo" type="number" value="195" step="0.1"></label>
-            <label>Radio personas (m) <input id="v2_personas" type="number" value="150"></label>
-            <label>Radio equipos (m) <input id="v2_equipos" type="number" value="300"></label>
-            <label>Dimensión lateral referencial (m) <input id="v2_lateral" type="number" value="394.83" step="0.01"></label>
-            <label>Opacidad plantilla <input id="v2_opacidad" type="number" value="0.82" step="0.05" min="0.1" max="1"></label>
+            <label>Radio equipos referencia (m) <input id="v2_equipos" type="number" value="300"></label>
+            <label>Ancho visual relativo <input id="v2_ancho" type="number" value="2.05" step="0.05"></label>
+            <label>Alto visual relativo <input id="v2_alto" type="number" value="2.20" step="0.05"></label>
+            <label>Opacidad plantilla <input id="v2_opacidad" type="number" value="0.92" step="0.05" min="0.1" max="1"></label>
             <label>Estado
               <select id="v2_estado">
                 <option>Programada</option>
@@ -112,12 +112,21 @@
       <section class="summary">
         <div><strong>Fecha</strong><br><span id="sumFecha">--</span></div>
         <div><strong>Voladuras programadas</strong><br><span id="sumVoladuras">--</span></div>
-        <div><strong>Modelo geométrico</strong><br>Imagen + escala + rotación</div>
+        <div><strong>Modelo geométrico</strong><br>PNG real + escala + rotación</div>
         <div><strong>Estado GPS</strong><br><span id="sumGPS">Pendiente</span></div>
       </section>
     </main>
   </div>
 
+  <script>
+    window.UNACEM_TEMPLATE = {
+      file: "contorno_unacem_real.png",
+      width: 464,
+      height: 324,
+      pinXPct: 39.7060,
+      pinYPct: 48.5105
+    };
+  </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
