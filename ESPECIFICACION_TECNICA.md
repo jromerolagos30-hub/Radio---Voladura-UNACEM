@@ -1,42 +1,38 @@
-# Especificación Técnica - Versión 20
+# Especificación Técnica - V21 FINAL UNACEM
 
 ## Objetivo
 
-Generar el contorno real del radio de voladura UNACEM, incluyendo radio de personas, radio de equipos, centro UTM y ángulo de giro por voladura.
+Generar el contorno real del radio de voladura UNACEM utilizando plantilla geométrica, rotación y georreferenciación referencial.
 
-## Campos principales
+## Datos por voladura
 
-- Fecha de voladura.
-- Voladura 1 y Voladura 2.
-- Centro UTM Norte.
-- Centro UTM Este.
-- Ángulo de giro.
-- Radio personas.
-- Radio equipos.
-- Estado.
+- Nombre
+- Centro UTM Norte
+- Centro UTM Este
+- Ángulo de giro
+- Radio personas
+- Radio equipos
+- Estado
 
-## Criterio geométrico
+## Plantilla personas R=150
 
-El contorno se genera por una plantilla de puntos locales:
+[-90,120], [-240,320], [-155,410], [0,450], [155,410], [240,320], [90,120], [150,-150], [0,-300], [-150,-150]
 
-- arco inferior,
-- laterales a 37° referenciales,
-- arco superior,
-- cierre poligonal.
+## Plantilla equipos R=300
 
-Luego se escala, rota y traslada al centro.
+[-180,240], [-420,560], [-260,700], [0,730], [260,700], [420,560], [180,240], [300,-300], [0,-600], [-300,-300]
 
 ## Fórmula de rotación
 
-```text
-x' = x cos θ - y sin θ
-y' = x sin θ + y cos θ
-```
+x’ = x cos θ - y sin θ
+y’ = x sin θ + y cos θ
 
-## Salida
+## Algoritmo
 
-- Polígono rojo: radio personas.
-- Polígono verde: radio equipos.
-- Línea punteada: dirección de perforación.
-- Marcador azul: centro de voladura.
-- GeoJSON exportable.
+1. Leer datos de voladura.
+2. Escalar plantilla según radio.
+3. Rotar por ángulo.
+4. Trasladar al centro UTM.
+5. Convertir a Lat/Lng.
+6. Dibujar con L.polygon.
+7. Validar GPS con punto-en-polígono.

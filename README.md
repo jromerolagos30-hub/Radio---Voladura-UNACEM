@@ -1,52 +1,29 @@
-# Radio de Voladura UNACEM - Versión 20
+# Radio de Voladura UNACEM - V21 FINAL
 
-Sistema web para administrar y visualizar radios de voladura con **contorno real dinámico**, basado en la geometría hallada para UNACEM.
+Versión final con la misma estructura simple que funcionó en la V18.
 
-## Mejoras incluidas
+## Archivos
 
-- Contorno real de voladura mediante polígonos, no círculos simples.
-- Plantilla geométrica UNACEM para radio de personas y equipos.
-- Giro independiente por voladura según el ángulo de la línea de perforación.
-- Soporte para 2 voladuras por día.
-- Modo Administrador y modo Usuario.
-- Validación GPS: dentro/fuera del radio.
-- Vista satelital y vista mapa.
-- Exportación GeoJSON.
-- Exportación de configuración JSON.
-- Interfaz visual tipo UNACEM.
-- Sin necesidad de backend para uso inicial en GitHub Pages.
+- index.html
+- app.js
+- styles.css
+- README.md
+- ESPECIFICACION_TECNICA.md
 
-## Publicación en GitHub Pages
+## Mejoras incorporadas
 
-1. Crear un repositorio en GitHub.
-2. Subir todos los archivos de esta carpeta.
-3. Ir a `Settings > Pages`.
-4. En `Branch`, seleccionar `main` y carpeta `/root`.
-5. Abrir el enlace publicado.
+- Contorno real mediante L.polygon.
+- Plantilla geométrica UNACEM basada en el contorno hallado.
+- Dos voladuras por día.
+- Coordenadas UTM Norte/Este por cada voladura.
+- Ángulo de giro independiente.
+- Radio personas en rojo.
+- Radio equipos en verde.
+- Línea de perforación.
+- GPS dentro/fuera.
+- Exportación GeoJSON y JSON.
+- Copia de enlace de usuario.
 
-## Archivo principal
+## GitHub Pages
 
-Abrir:
-
-```text
-index.html
-```
-
-## Lógica geométrica
-
-La figura se genera con plantillas de vértices locales en metros:
-
-- Rojo: radio personas.
-- Verde: radio equipos.
-
-Luego se aplica:
-
-1. escala por radio configurado,
-2. rotación por ángulo de giro,
-3. traslado al centro UTM,
-4. conversión aproximada UTM a lat/lng,
-5. dibujo como polígono Leaflet.
-
-## Nota técnica
-
-La plantilla está basada en la geometría referencial hallada desde la imagen de contorno real. Si luego se obtiene el DXF con vértices exactos, solo se reemplazan las plantillas en `assets/js/geometry.js`.
+Subir estos 5 archivos en la raíz del repositorio y activar Pages desde Settings > Pages.
