@@ -1,203 +1,141 @@
-// Radio de Voladura UNACEM V20
-// Contorno final validado: geometría paramétrica de radio rojo 150 y verde 300.
-// Los 37° se usan solo como referencia técnica interna para los laterales.
+let satellite = true;
+let map = L.map('map', {zoomControl:true}).setView([-12.0, -76.95], 14);
+let satelliteLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {maxZoom:20});
+let mapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:20});
+satelliteLayer.addTo(map);
 
-let map, layer, gpsMarker;
-let currentPolygons = [];
+let layerGroup = L.layerGroup().addTo(map);
+let activePolygons = [];
+let gpsMarker = null;
 
-const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20});
-const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {maxZoom: 20});
+document.getElementById('fechaGlobal').value = new Date().toISOString().slice(0,10);
 
-function arc(cx, cy, r, a1, a2, steps){
-  const pts = [];
-  const start = a1 * Math.PI / 180;
-  const end = a2 * Math.PI / 180;
-  for(let i=0;i<=steps;i++){
-    const t = start + (end-start) * i / steps;
-    pts.push([cx + r*Math.cos(t), cy + r*Math.sin(t)]);
-  }
-  return pts;
+function toggleBaseMap(){
+  if(satellite){ map.removeLayer(satelliteLayer); mapLayer.addTo(map); }
+  else { map.removeLayer(mapLayer); satelliteLayer.addTo(map); }
+  satellite = !satellite;
 }
 
-function rotatePoint(x,y,deg){
-  const a = deg * Math.PI/180;
-  return [x*Math.cos(a)-y*Math.sin(a), x*Math.sin(a)+y*Math.cos(a)];
+function getBlast(i){
+  return {
+    id:i,
+    active:document.getElementById(`v${i}_activa`).checked,
+    name:document.getElementById(`v${i}_nombre`).value,
+    norte:Number(document.getElementById(`v${i}_norte`).value),
+    este:Number(document.getElementById(`v${i}_este`).value),
+    angle:Number(document.getElementById(`v${i}_angulo`).value),
+    radioPersonas:Number(document.getElementById(`v${i}_radio_personas`).value),
+    radioEquipos:Number(document.getElementById(`v${i}_radio_equipos`).value),
+    estado:document.getElementById(`v${i}_estado`).value
+  };
 }
 
-function metersToLatLng(dx,dy,lat0,lng0){
-  const R = 6378137;
-  const lat = lat0 + (dy/R) * 180/Math.PI;
-  const lng = lng0 + (dx/(R*Math.cos(lat0*Math.PI/180))) * 180/Math.PI;
-  return [lat,lng];
+function renderBlast(v){
+  if(!v.active) return;
+  const center = utmToLatLng(v.este, v.norte);
+
+  const equipos = buildContour(TEMPLATE_EQUIPOS_300, 300, v.radioEquipos, v.este, v.norte, v.angle);
+  const personas = buildContour(TEMPLATE_PERSONAS_150, 150, v.radioPersonas, v.este, v.norte, v.angle);
+
+  L.polygon(equipos, {color:'#16a34a', weight:3, fillColor:'#22c55e', fillOpacity:.42})
+    .bindPopup(`<b>${v.name}</b><br>Contorno equipos<br>Giro: ${v.angle}°`).addTo(layerGroup);
+
+  L.polygon(personas, {color:'#ef1c25', weight:3, fillColor:'#ef1c25', fillOpacity:.62})
+    .bindPopup(`<b>${v.name}</b><br>Contorno personas<br>Giro: ${v.angle}°`).addTo(layerGroup);
+
+  const direction = buildContour([[0,-650],[0,800]], 1, 1, v.este, v.norte, v.angle);
+  L.polyline(direction, {color:'#111827', weight:2, dashArray:'7,7'}).addTo(layerGroup);
+
+  L.marker(center).bindPopup(`<b>${v.name}</b><br>Centro UTM<br>N: ${v.norte}<br>E: ${v.este}`).addTo(layerGroup);
+
+  activePolygons.push({blast:v.name, type:'personas', points:personas});
+  activePolygons.push({blast:v.name, type:'equipos', points:equipos});
 }
 
-function localToGeo(points, lat, lng, angle){
-  return points.map(p => {
-    const r = rotatePoint(p[0], p[1], angle);
-    return metersToLatLng(r[0], r[1], lat, lng);
-  });
+function renderAll(){
+  layerGroup.clearLayers();
+  activePolygons = [];
+  [getBlast(1), getBlast(2)].forEach(renderBlast);
+
+  const all = activePolygons.flatMap(p=>p.points);
+  if(all.length) map.fitBounds(all, {padding:[30,30]});
 }
 
-// CONTORNO VERDE V20
-// Base: radio 300 con sector superior abierto y círculo inferior completo conectado.
-function greenTemplate(r=300){
-  const cutA = 142; // controla intersección lateral
-  const cutB = 38;
-  const lower = arc(0,0,r,cutA,360+cutB,100);
-  const top = arc(0,0,r,cutB,cutA,70);
-  return [...lower, ...top];
-}
-
-// CONTORNO ROJO V20
-// Base: radio 150, ampliado hacia la parte superior hasta alcanzar la línea de intersección del radio 300.
-// Mantiene el arco inferior circular y laterales rectos.
-function redTemplate(r=150, re=300){
-  const sideAngleLeft = 142;
-  const sideAngleRight = 38;
-
-  const bottom = arc(0,0,r,270,90,70); // arco inferior circular radio 150, por lado derecho
-  const topR = r * 1.18;
-  const topCy = r * 0.18;
-  const top = arc(0, topCy, topR, sideAngleRight, sideAngleLeft, 70);
-
-  // Une el arco superior con el arco inferior por laterales rectos.
-  const rightLower = [r*Math.cos(sideAngleRight*Math.PI/180), r*Math.sin(sideAngleRight*Math.PI/180)];
-  const leftLower = [r*Math.cos(sideAngleLeft*Math.PI/180), r*Math.sin(sideAngleLeft*Math.PI/180)];
-
-  return [
-    ...bottom,
-    ...top,
-    leftLower
-  ];
-}
-
-function dataFromInputs(){
-  return [1,2].map(n => ({
-    id:n,
-    name:`Voladura ${n}`,
-    lat: parseFloat(document.getElementById(`v${n}_lat`)?.value ?? (n===1?-12.043567:-12.048)),
-    lng: parseFloat(document.getElementById(`v${n}_lng`)?.value ?? -76.870123),
-    angle: parseFloat(document.getElementById(`v${n}_ang`)?.value ?? (n===1?15:195)),
-    rp: parseFloat(document.getElementById(`v${n}_rp`)?.value ?? 150),
-    re: parseFloat(document.getElementById(`v${n}_re`)?.value ?? 300),
-    estado: document.getElementById(`v${n}_estado`)?.value ?? "Programada"
-  }));
-}
-
-function dataFromHash(){
-  try{
-    if(location.hash.startsWith("#data=")){
-      return JSON.parse(decodeURIComponent(escape(atob(location.hash.replace("#data=","")))));
-    }
-  }catch(e){}
-  return [
-    {id:1,name:"Voladura 1",lat:-12.043567,lng:-76.870123,angle:15,rp:150,re:300,estado:"Programada"},
-    {id:2,name:"Voladura 2",lat:-12.048,lng:-76.870123,angle:195,rp:150,re:300,estado:"Programada"}
-  ];
-}
-
-function draw(data){
-  layer.clearLayers();
-  currentPolygons = [];
-  const bounds = [];
-
-  data.forEach(v => {
-    const green = localToGeo(greenTemplate(v.re), v.lat, v.lng, v.angle);
-    const red = localToGeo(redTemplate(v.rp, v.re), v.lat, v.lng, v.angle);
-
-    L.polygon(green, {
-      color:"#ffffff",
-      weight:2,
-      fillColor:"#23b83f",
-      fillOpacity:.74
-    }).addTo(layer).bindPopup(`<b>${v.name}</b><br>Radio evacuación personal: ${v.re} m`);
-
-    L.polygon(red, {
-      color:"#ffffff",
-      weight:2,
-      fillColor:"#f02118",
-      fillOpacity:.82
-    }).addTo(layer).bindPopup(`<b>${v.name}</b><br>Sector riesgo equipos: ${v.rp} m`);
-
-    const dir = localToGeo([[0,-v.re],[0,v.re]], v.lat, v.lng, v.angle);
-    L.polyline(dir, {color:"#111",weight:2,dashArray:"8,7"}).addTo(layer);
-
-    L.marker([v.lat,v.lng]).addTo(layer).bindPopup(`<b>${v.name}</b><br>${v.estado}`);
-
-    currentPolygons.push({type:"red", name:v.name, points:red});
-    currentPolygons.push({type:"green", name:v.name, points:green});
-    green.concat(red).forEach(p=>bounds.push(p));
-  });
-
-  if(bounds.length) map.fitBounds(bounds, {padding:[30,30]});
-}
-
-function initMap(){
-  map = L.map("map").setView([-12.045,-76.870123],15);
-  sat.addTo(map);
-  layer = L.layerGroup().addTo(map);
-
-  map.on("mousemove", e => {
-    const lat = document.getElementById("latInfo");
-    const lng = document.getElementById("lngInfo");
-    if(lat) lat.textContent = e.latlng.lat.toFixed(6);
-    if(lng) lng.textContent = e.latlng.lng.toFixed(6);
-  });
-
-  const satBtn = document.getElementById("satBtn");
-  const mapBtn = document.getElementById("mapBtn");
-  if(satBtn && mapBtn){
-    satBtn.onclick=()=>{map.removeLayer(osm);sat.addTo(map);satBtn.classList.add("active");mapBtn.classList.remove("active")};
-    mapBtn.onclick=()=>{map.removeLayer(sat);osm.addTo(map);mapBtn.classList.add("active");satBtn.classList.remove("active")};
-  }
-}
-
-function iniciarAdmin(){ initMap(); draw(dataFromInputs()); }
-function iniciarUsuario(){ initMap(); draw(dataFromHash()); }
-function actualizar(){ draw(dataFromInputs()); }
-
-function generarEnlace(){
-  const data = dataFromInputs();
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-  const base = location.href.replace("admin.html","usuario.html").split("#")[0];
-  document.getElementById("shareLink").value = base + "#data=" + encoded;
-}
-
-function pointInPolygon(point, vs){
-  const x = point[1], y = point[0];
-  let inside = false;
-  for(let i=0,j=vs.length-1;i<vs.length;j=i++){
-    const xi=vs[i][1], yi=vs[i][0];
-    const xj=vs[j][1], yj=vs[j][0];
-    const intersect = ((yi>y)!=(yj>y)) && (x < (xj-xi)*(y-yi)/((yj-yi)||1e-12)+xi);
-    if(intersect) inside = !inside;
-  }
-  return inside;
-}
-
-function activarGPS(){
-  const status = document.getElementById("estadoGPS");
-  if(!navigator.geolocation){
-    status.className="gps danger"; status.textContent="El navegador no soporta GPS.";
-    return;
-  }
+function startGPS(){
+  if(!navigator.geolocation){ alert('GPS no disponible en este navegador.'); return; }
   navigator.geolocation.watchPosition(pos=>{
-    const lat=pos.coords.latitude, lng=pos.coords.longitude;
-    if(!gpsMarker) gpsMarker=L.marker([lat,lng]).addTo(layer).bindPopup("Mi ubicación");
-    else gpsMarker.setLatLng([lat,lng]);
+    const p=[pos.coords.latitude,pos.coords.longitude];
+    if(!gpsMarker) gpsMarker=L.marker(p).addTo(map).bindPopup('Mi ubicación');
+    else gpsMarker.setLatLng(p);
 
-    let red=false, green=false;
-    currentPolygons.forEach(poly=>{
-      if(pointInPolygon([lat,lng], poly.points)){
-        if(poly.type==="red") red=true;
-        if(poly.type==="green") green=true;
-      }
-    });
-
-    if(red){ status.className="gps danger"; status.textContent="ALERTA: Usted está dentro del sector rojo de riesgo."; }
-    else if(green){ status.className="gps warn"; status.textContent="Atención: Usted está dentro del radio verde de evacuación."; }
-    else { status.className="gps safe"; status.textContent="Usted está fuera del radio de voladura."; }
-  }, err=>{
-    status.className="gps danger"; status.textContent="No se pudo activar GPS: "+err.message;
-  }, {enableHighAccuracy:true, maximumAge:5000});
+    const hits = activePolygons.filter(poly=>polygonContains(p, poly.points));
+    const box=document.getElementById('statusBox');
+    if(hits.length){
+      box.className='danger';
+      box.textContent='ALERTA: Dentro del radio de voladura: ' + hits.map(h=>`${h.blast} (${h.type})`).join(', ');
+    }else{
+      box.className='safe';
+      box.textContent='Fuera del radio de voladura configurado.';
+    }
+  }, err=>alert('No se pudo activar GPS: '+err.message), {enableHighAccuracy:true});
 }
+
+function toGeoJSON(){
+  const features = activePolygons.map(p=>({
+    type:'Feature',
+    properties:{blast:p.blast, tipo:p.type},
+    geometry:{type:'Polygon', coordinates:[p.points.map(ll=>[ll[1], ll[0]])]}
+  }));
+  return {type:'FeatureCollection', features};
+}
+
+function download(name, text){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+  a.download=name;
+  a.click();
+}
+
+function exportGeoJSON(){
+  renderAll();
+  download('radios_voladura_unacem_v20.geojson', JSON.stringify(toGeoJSON(), null, 2));
+}
+
+function exportConfig(){
+  const cfg={fecha:document.getElementById('fechaGlobal').value, voladuras:[getBlast(1),getBlast(2)]};
+  download('config_voladuras_unacem_v20.json', JSON.stringify(cfg, null, 2));
+}
+
+function copyUserLink(){
+  const cfg={fecha:document.getElementById('fechaGlobal').value, voladuras:[getBlast(1),getBlast(2)]};
+  const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+  const url=location.origin+location.pathname+'#cfg='+encoded;
+  navigator.clipboard.writeText(url).then(()=>alert('Enlace copiado.'));
+}
+
+function loadFromHash(){
+  if(!location.hash.startsWith('#cfg=')) return;
+  try{
+    const cfg=JSON.parse(decodeURIComponent(escape(atob(location.hash.replace('#cfg=','')))));
+    if(cfg.fecha) document.getElementById('fechaGlobal').value=cfg.fecha;
+    (cfg.voladuras||[]).forEach((v,idx)=>{
+      const i=idx+1;
+      document.getElementById(`v${i}_activa`).checked=!!v.active;
+      document.getElementById(`v${i}_nombre`).value=v.name||`VOLADURA ${i}`;
+      document.getElementById(`v${i}_norte`).value=v.norte;
+      document.getElementById(`v${i}_este`).value=v.este;
+      document.getElementById(`v${i}_angulo`).value=v.angle;
+      document.getElementById(`v${i}_radio_personas`).value=v.radioPersonas;
+      document.getElementById(`v${i}_radio_equipos`).value=v.radioEquipos;
+      document.getElementById(`v${i}_estado`).value=v.estado||'Programada';
+    });
+  }catch(e){console.error(e)}
+}
+
+function setView(mode){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+loadFromHash();
+renderAll();

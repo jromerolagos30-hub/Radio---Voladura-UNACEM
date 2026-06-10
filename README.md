@@ -1,33 +1,52 @@
-# Radio de Voladura UNACEM V20
+# Radio de Voladura UNACEM - Versión 20
 
-Versión lista para subir a GitHub Pages.
+Sistema web para administrar y visualizar radios de voladura con **contorno real dinámico**, basado en la geometría hallada para UNACEM.
 
-## Archivos
+## Mejoras incluidas
 
-- `index.html`: portada.
-- `admin.html`: página administrativa.
-- `usuario.html`: página para usuarios finales.
-- `app.js`: lógica geoespacial y generación del contorno V20.
-- `styles.css`: estilos.
-- `assets/referencia_contorno_v20.png`: referencia visual usada para el contorno.
-
-## Funcionalidades
-
-- Hasta 2 voladuras por día.
-- Cada voladura tiene centro, radio de personas, radio de equipos y ángulo de giro.
-- Contorno rojo y verde basado en el modelo final validado.
-- Generación de enlace para usuario.
-- Validación GPS en página usuario.
+- Contorno real de voladura mediante polígonos, no círculos simples.
+- Plantilla geométrica UNACEM para radio de personas y equipos.
+- Giro independiente por voladura según el ángulo de la línea de perforación.
+- Soporte para 2 voladuras por día.
+- Modo Administrador y modo Usuario.
+- Validación GPS: dentro/fuera del radio.
 - Vista satelital y vista mapa.
+- Exportación GeoJSON.
+- Exportación de configuración JSON.
+- Interfaz visual tipo UNACEM.
+- Sin necesidad de backend para uso inicial en GitHub Pages.
 
-## Publicar en GitHub Pages
+## Publicación en GitHub Pages
 
-1. Crear repositorio.
+1. Crear un repositorio en GitHub.
 2. Subir todos los archivos de esta carpeta.
 3. Ir a `Settings > Pages`.
-4. Seleccionar rama `main` y carpeta `/root`.
-5. Abrir `index.html`, `admin.html` o `usuario.html`.
+4. En `Branch`, seleccionar `main` y carpeta `/root`.
+5. Abrir el enlace publicado.
 
-## Nota
+## Archivo principal
 
-El ángulo de 37° se usa internamente como referencia geométrica del contorno, pero puede ocultarse en la interfaz si se desea.
+Abrir:
+
+```text
+index.html
+```
+
+## Lógica geométrica
+
+La figura se genera con plantillas de vértices locales en metros:
+
+- Rojo: radio personas.
+- Verde: radio equipos.
+
+Luego se aplica:
+
+1. escala por radio configurado,
+2. rotación por ángulo de giro,
+3. traslado al centro UTM,
+4. conversión aproximada UTM a lat/lng,
+5. dibujo como polígono Leaflet.
+
+## Nota técnica
+
+La plantilla está basada en la geometría referencial hallada desde la imagen de contorno real. Si luego se obtiene el DXF con vértices exactos, solo se reemplazan las plantillas en `assets/js/geometry.js`.

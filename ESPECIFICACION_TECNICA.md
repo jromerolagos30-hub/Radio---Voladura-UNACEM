@@ -1,40 +1,42 @@
-# Especificación técnica - V18
+# Especificación Técnica - Versión 20
 
-## Requerimiento implementado
+## Objetivo
 
-La aplicación debe reproducir el contorno real del radio de voladura de la imagen de referencia, usando coordenadas referenciales.
+Generar el contorno real del radio de voladura UNACEM, incluyendo radio de personas, radio de equipos, centro UTM y ángulo de giro por voladura.
 
-## Método
+## Campos principales
 
-Se usa una plantilla geométrica local. La plantilla se rota y traslada al centro de cada voladura.
+- Fecha de voladura.
+- Voladura 1 y Voladura 2.
+- Centro UTM Norte.
+- Centro UTM Este.
+- Ángulo de giro.
+- Radio personas.
+- Radio equipos.
+- Estado.
 
-### Fórmula de rotación
+## Criterio geométrico
 
-Para cada punto local `(x,y)`:
+El contorno se genera por una plantilla de puntos locales:
+
+- arco inferior,
+- laterales a 37° referenciales,
+- arco superior,
+- cierre poligonal.
+
+Luego se escala, rota y traslada al centro.
+
+## Fórmula de rotación
 
 ```text
-xr = x*cos(a) - y*sin(a)
-yr = x*sin(a) + y*cos(a)
+x' = x cos θ - y sin θ
+y' = x sin θ + y cos θ
 ```
 
-donde `a` es el ángulo de giro en grados convertido a radianes.
+## Salida
 
-### Conversión aproximada a geografía
-
-```text
-lat = lat0 + (dy / R) * 180/pi
-lng = lng0 + (dx / (R*cos(lat0))) * 180/pi
-```
-
-donde:
-
-- `R = 6378137 m`
-- `lat0/lng0` = centro de voladura.
-
-## Control de usuario
-
-La ubicación del usuario se obtiene con GPS del navegador y se valida con algoritmo punto-en-polígono.
-
-## Limitación
-
-Las coordenadas son referenciales por imagen. Para precisión final, se recomienda reemplazar los puntos por coordenadas obtenidas del CAD/DXF.
+- Polígono rojo: radio personas.
+- Polígono verde: radio equipos.
+- Línea punteada: dirección de perforación.
+- Marcador azul: centro de voladura.
+- GeoJSON exportable.
