@@ -1,69 +1,25 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UNACEM | Radio de Voladura</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>UNACEM | Radio de Voladura V20</title>
+  <link rel="stylesheet" href="./styles.css"/>
 </head>
-<body>
+<body class="landing">
   <header class="topbar">
-    <div class="brand"><div class="shield">U</div><b>UNACEM</b><span></span><strong>RADIO DE VOLADURA</strong></div>
-    <div class="date">📅 Fecha: <b>24/05/2025</b>⌄</div>
-    <div class="user">🔔 <span class="badge">3</span> 👤 <b>Administrador</b><small>Admin</small></div>
+    <div class="brand"><span class="logo">U</span><b>UNACEM</b><small>RADIO DE VOLADURA V20</small></div>
   </header>
-  <main class="layout">
-    <aside class="sidebar">
-      <nav>
-        <a>⌂ Dashboard</a><a class="active">☼ Voladuras</a><a>🗺 Mapa en vivo</a><a>▤ Reportes</a><a>♢ Alertas</a><a>◷ Historial</a><a>♙ Usuarios</a><a>⚙ Configuración</a>
-      </nav>
-      <div class="legend">
-        <h3>LEYENDA</h3>
-        <p><i class="red"></i>Sector de riesgo<br/>para equipos</p>
-        <p><i class="green"></i>Radio de evacuación<br/>de personal</p>
-        <p><i class="pin-dot"></i>Centro de voladura</p>
-        <p><i class="dash"></i>Dirección de línea<br/>de perforación</p>
-      </div>
-    </aside>
-    <section class="map-wrap">
-      <div class="map-head"><h2>MAPA DE RADIOS DE VOLADURA</h2><div><button class="primary">Vista Satelital</button><button>Vista Mapa</button></div></div>
-      <div class="map">
-        <div class="zoom"><button>＋</button><button>−</button><button>⛶</button></div>
-        <svg class="overlay" viewBox="0 0 900 720" aria-label="Radios de voladura">
-          <defs>
-            <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(9,135,24,.55)" stroke-width="1"/></pattern>
-            <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="rgba(146,0,0,.55)"/></pattern>
-          </defs>
-          <g class="blast" transform="translate(450 220)">
-            <path class="green-fill" d="M -180 160 A 180 180 0 0 0 180 160 L 180 22 L 265 -78 A 300 300 0 0 0 -265 -78 L -180 22 Z" />
-            <path class="red-fill" d="M -112 96 A 150 150 0 0 0 112 96 L 112 22 L 168 -44 A 150 150 0 0 0 -168 -44 L -112 22 Z" />
-            <line class="axis" x1="0" y1="-205" x2="0" y2="205" />
-            <path class="angle" d="M -105 20 A 35 35 0 0 1 -70 -15"/><text x="-102" y="-18">37°</text>
-            <path class="angle" d="M 105 20 A 35 35 0 0 0 70 -15"/><text x="58" y="-18">37°</text>
-            <g class="pin" transform="translate(0 0)"><path d="M0-30c-18 0-32 13-32 31 0 23 32 55 32 55S32 24 32 1C32-17 18-30 0-30z"/><circle cx="0" cy="0" r="10"/></g>
-            <rect class="tag-bg" x="184" y="-5" width="106" height="34" rx="4"/><text class="tag" x="237" y="17">VOLADURA 1</text>
-          </g>
-          <g class="blast" transform="translate(450 565)">
-            <path class="green-fill" d="M -180 160 A 180 180 0 0 0 180 160 L 180 22 L 265 -78 A 300 300 0 0 0 -265 -78 L -180 22 Z" />
-            <path class="red-fill" d="M -112 96 A 150 150 0 0 0 112 96 L 112 22 L 168 -44 A 150 150 0 0 0 -168 -44 L -112 22 Z" />
-            <line class="axis" x1="0" y1="-205" x2="0" y2="205" />
-            <path class="angle" d="M -105 20 A 35 35 0 0 1 -70 -15"/><text x="-102" y="-18">37°</text>
-            <path class="angle" d="M 105 20 A 35 35 0 0 0 70 -15"/><text x="58" y="-18">37°</text>
-            <g class="pin" transform="translate(0 0)"><path d="M0-30c-18 0-32 13-32 31 0 23 32 55 32 55S32 24 32 1C32-17 18-30 0-30z"/><circle cx="0" cy="0" r="10"/></g>
-            <rect class="tag-bg" x="184" y="-5" width="106" height="34" rx="4"/><text class="tag" x="237" y="17">VOLADURA 2</text>
-          </g>
-        </svg>
-        <div class="scale">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;300 m</div>
-        <div class="coords">Lat: -12.043567 &nbsp;&nbsp;&nbsp; Lng: -76.870123 ◎</div>
-      </div>
-      <div class="cards"><article>📅<small>Fecha</small><b>24/05/2025</b></article><article>🕘<small>Voladuras programadas</small><b>2</b></article><article>🛡<small>Estado general</small><b>Sin riesgo</b></article><article>♙<small>Personal en área segura</small><b>128</b></article><article>⚠<small>Alertas activas</small><b>0</b></article></div>
+  <main class="landing-grid">
+    <section class="hero">
+      <h1>Radio de Voladura V20</h1>
+      <p>Versión lista para GitHub Pages con página administrativa, página usuario y contorno final de radios validado.</p>
+      <a class="btn primary" href="./admin.html">Abrir Administrador</a>
+      <a class="btn secondary" href="./usuario.html">Abrir Usuario</a>
     </section>
-    <aside class="panel">
-      <h2>VOLADURAS DEL DÍA</h2>
-      <div class="blast-card"><h3>VOLADURA 1 <span>ACTIVA</span></h3><p>Centro (UTM)<br/>⌖ N: 8,678,543.32 &nbsp;&nbsp; E: 368,543.21</p><label>Ángulo de giro <input value="15°"></label><label>Radio personas (m) <input value="150"></label><label>Radio equipos (m) <input value="300"></label><label>Estado <select><option>Programada</option></select></label><button class="primary full">Actualizar</button></div>
-      <div class="blast-card"><h3>VOLADURA 2 <span>ACTIVA</span></h3><p>Centro (UTM)<br/>⌖ N: 8,677,125.66 &nbsp;&nbsp; E: 368,451.23</p><label>Ángulo de giro <input value="195°"></label><label>Radio personas (m) <input value="150"></label><label>Radio equipos (m) <input value="300"></label><label>Estado <select><option>Programada</option></select></label><button class="primary full">Actualizar</button></div>
-      <button class="outline">＋ Nueva Voladura</button>
-    </aside>
+    <section class="preview">
+      <img src="./assets/referencia_contorno_v20.png" alt="Referencia de contorno V20">
+    </section>
   </main>
 </body>
 </html>

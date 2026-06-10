@@ -1,215 +1,203 @@
-/* 
-V18 - Contorno real por plantilla geométrica.
-La figura ya no se genera con L.circle ni con sectores simples.
-Se genera como L.polygon usando puntos referenciales en metros,
-rotados por el ángulo de giro y trasladados al centro geográfico.
-*/
+// Radio de Voladura UNACEM V20
+// Contorno final validado: geometría paramétrica de radio rojo 150 y verde 300.
+// Los 37° se usan solo como referencia técnica interna para los laterales.
 
-// Plantilla referencial obtenida de la imagen compartida:
-// Centro local = (0,0). X = Este/Oeste, Y = Norte/Sur.
-// Rojo = personas. Verde = equipos.
-// Los valores pueden afinarse luego con coordenadas CAD/DXF exactas.
-const PLANTILLA_PERSONAS = [
-  [-90, 120],
-  [-240, 320],
-  [-160, 410],
-  [0, 450],
-  [160, 410],
-  [240, 320],
-  [90, 120],
-  [145, -80],
-  [105, -210],
-  [0, -300],
-  [-105, -210],
-  [-145, -80]
-];
+let map, layer, gpsMarker;
+let currentPolygons = [];
 
-const PLANTILLA_EQUIPOS = [
-  [-180, 240],
-  [-420, 560],
-  [-260, 700],
-  [0, 730],
-  [260, 700],
-  [420, 560],
-  [180, 240],
-  [290, -160],
-  [210, -420],
-  [0, -600],
-  [-210, -420],
-  [-290, -160]
-];
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20});
+const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {maxZoom: 20});
 
-let map = L.map('map').setView([-12.1600, -76.9300], 15);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 20,
-  attribution: '&copy; OpenStreetMap'
-}).addTo(map);
-
-let capas = L.layerGroup().addTo(map);
-let gpsMarker = null;
-let gpsCircle = null;
-let poligonos = [];
-
-function hoyISO(){
-  return new Date().toISOString().slice(0,10);
+function arc(cx, cy, r, a1, a2, steps){
+  const pts = [];
+  const start = a1 * Math.PI / 180;
+  const end = a2 * Math.PI / 180;
+  for(let i=0;i<=steps;i++){
+    const t = start + (end-start) * i / steps;
+    pts.push([cx + r*Math.cos(t), cy + r*Math.sin(t)]);
+  }
+  return pts;
 }
-document.getElementById('v1_fecha').value = hoyISO();
-document.getElementById('v2_fecha').value = hoyISO();
 
-function metrosALatLng(dx, dy, lat0, lng0) {
+function rotatePoint(x,y,deg){
+  const a = deg * Math.PI/180;
+  return [x*Math.cos(a)-y*Math.sin(a), x*Math.sin(a)+y*Math.cos(a)];
+}
+
+function metersToLatLng(dx,dy,lat0,lng0){
   const R = 6378137;
-  const dLat = dy / R;
-  const dLng = dx / (R * Math.cos(Math.PI * lat0 / 180));
+  const lat = lat0 + (dy/R) * 180/Math.PI;
+  const lng = lng0 + (dx/(R*Math.cos(lat0*Math.PI/180))) * 180/Math.PI;
+  return [lat,lng];
+}
+
+function localToGeo(points, lat, lng, angle){
+  return points.map(p => {
+    const r = rotatePoint(p[0], p[1], angle);
+    return metersToLatLng(r[0], r[1], lat, lng);
+  });
+}
+
+// CONTORNO VERDE V20
+// Base: radio 300 con sector superior abierto y círculo inferior completo conectado.
+function greenTemplate(r=300){
+  const cutA = 142; // controla intersección lateral
+  const cutB = 38;
+  const lower = arc(0,0,r,cutA,360+cutB,100);
+  const top = arc(0,0,r,cutB,cutA,70);
+  return [...lower, ...top];
+}
+
+// CONTORNO ROJO V20
+// Base: radio 150, ampliado hacia la parte superior hasta alcanzar la línea de intersección del radio 300.
+// Mantiene el arco inferior circular y laterales rectos.
+function redTemplate(r=150, re=300){
+  const sideAngleLeft = 142;
+  const sideAngleRight = 38;
+
+  const bottom = arc(0,0,r,270,90,70); // arco inferior circular radio 150, por lado derecho
+  const topR = r * 1.18;
+  const topCy = r * 0.18;
+  const top = arc(0, topCy, topR, sideAngleRight, sideAngleLeft, 70);
+
+  // Une el arco superior con el arco inferior por laterales rectos.
+  const rightLower = [r*Math.cos(sideAngleRight*Math.PI/180), r*Math.sin(sideAngleRight*Math.PI/180)];
+  const leftLower = [r*Math.cos(sideAngleLeft*Math.PI/180), r*Math.sin(sideAngleLeft*Math.PI/180)];
+
   return [
-    lat0 + dLat * 180 / Math.PI,
-    lng0 + dLng * 180 / Math.PI
+    ...bottom,
+    ...top,
+    leftLower
   ];
 }
 
-function rotarPunto(x, y, grados) {
-  const a = grados * Math.PI / 180;
-  const xr = x * Math.cos(a) - y * Math.sin(a);
-  const yr = x * Math.sin(a) + y * Math.cos(a);
-  return [xr, yr];
+function dataFromInputs(){
+  return [1,2].map(n => ({
+    id:n,
+    name:`Voladura ${n}`,
+    lat: parseFloat(document.getElementById(`v${n}_lat`)?.value ?? (n===1?-12.043567:-12.048)),
+    lng: parseFloat(document.getElementById(`v${n}_lng`)?.value ?? -76.870123),
+    angle: parseFloat(document.getElementById(`v${n}_ang`)?.value ?? (n===1?15:195)),
+    rp: parseFloat(document.getElementById(`v${n}_rp`)?.value ?? 150),
+    re: parseFloat(document.getElementById(`v${n}_re`)?.value ?? 300),
+    estado: document.getElementById(`v${n}_estado`)?.value ?? "Programada"
+  }));
 }
 
-function generarPoligonoDesdePlantilla(plantilla, lat, lng, angulo) {
-  return plantilla.map(([x,y]) => {
-    const [xr, yr] = rotarPunto(x, y, angulo);
-    return metrosALatLng(xr, yr, lat, lng);
-  });
+function dataFromHash(){
+  try{
+    if(location.hash.startsWith("#data=")){
+      return JSON.parse(decodeURIComponent(escape(atob(location.hash.replace("#data=","")))));
+    }
+  }catch(e){}
+  return [
+    {id:1,name:"Voladura 1",lat:-12.043567,lng:-76.870123,angle:15,rp:150,re:300,estado:"Programada"},
+    {id:2,name:"Voladura 2",lat:-12.048,lng:-76.870123,angle:195,rp:150,re:300,estado:"Programada"}
+  ];
 }
 
-function getVoladura(n) {
-  return {
-    activa: document.getElementById(`v${n}_activa`).checked,
-    nombre: document.getElementById(`v${n}_nombre`).value,
-    lat: parseFloat(document.getElementById(`v${n}_lat`).value),
-    lng: parseFloat(document.getElementById(`v${n}_lng`).value),
-    fecha: document.getElementById(`v${n}_fecha`).value,
-    hora: document.getElementById(`v${n}_hora`).value,
-    ang: parseFloat(document.getElementById(`v${n}_ang`).value || 0)
-  };
-}
-
-function actualizar() {
-  capas.clearLayers();
-  poligonos = [];
+function draw(data){
+  layer.clearLayers();
+  currentPolygons = [];
   const bounds = [];
 
-  [getVoladura(1), getVoladura(2)].forEach(v => {
-    if (!v.activa || isNaN(v.lat) || isNaN(v.lng)) return;
+  data.forEach(v => {
+    const green = localToGeo(greenTemplate(v.re), v.lat, v.lng, v.angle);
+    const red = localToGeo(redTemplate(v.rp, v.re), v.lat, v.lng, v.angle);
 
-    const personas = generarPoligonoDesdePlantilla(PLANTILLA_PERSONAS, v.lat, v.lng, v.ang);
-    const equipos = generarPoligonoDesdePlantilla(PLANTILLA_EQUIPOS, v.lat, v.lng, v.ang);
+    L.polygon(green, {
+      color:"#ffffff",
+      weight:2,
+      fillColor:"#23b83f",
+      fillOpacity:.74
+    }).addTo(layer).bindPopup(`<b>${v.name}</b><br>Radio evacuación personal: ${v.re} m`);
 
-    const polyEq = L.polygon(equipos, {
-      color: 'green',
-      weight: 3,
-      fillColor: 'lime',
-      fillOpacity: 0.12
-    }).bindPopup(`<b>${v.nombre}</b><br>Radio Equipos<br>Giro: ${v.ang}°`).addTo(capas);
+    L.polygon(red, {
+      color:"#ffffff",
+      weight:2,
+      fillColor:"#f02118",
+      fillOpacity:.82
+    }).addTo(layer).bindPopup(`<b>${v.name}</b><br>Sector riesgo equipos: ${v.rp} m`);
 
-    const polyPe = L.polygon(personas, {
-      color: 'red',
-      weight: 3,
-      fillColor: 'red',
-      fillOpacity: 0.06
-    }).bindPopup(`<b>${v.nombre}</b><br>Radio Personas<br>Giro: ${v.ang}°`).addTo(capas);
+    const dir = localToGeo([[0,-v.re],[0,v.re]], v.lat, v.lng, v.angle);
+    L.polyline(dir, {color:"#111",weight:2,dashArray:"8,7"}).addTo(layer);
 
-    L.marker([v.lat, v.lng]).bindPopup(`<b>${v.nombre}</b><br>${v.fecha} ${v.hora}`).addTo(capas);
+    L.marker([v.lat,v.lng]).addTo(layer).bindPopup(`<b>${v.name}</b><br>${v.estado}`);
 
-    poligonos.push({tipo:'personas', nombre:v.nombre, puntos:personas});
-    poligonos.push({tipo:'equipos', nombre:v.nombre, puntos:equipos});
-
-    personas.concat(equipos).forEach(p => bounds.push(p));
+    currentPolygons.push({type:"red", name:v.name, points:red});
+    currentPolygons.push({type:"green", name:v.name, points:green});
+    green.concat(red).forEach(p=>bounds.push(p));
   });
 
-  if (bounds.length) map.fitBounds(bounds, {padding:[30,30]});
+  if(bounds.length) map.fitBounds(bounds, {padding:[30,30]});
 }
 
-function generarEnlace() {
-  const data = {
-    v1: getVoladura(1),
-    v2: getVoladura(2)
-  };
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-  const url = location.origin + location.pathname + '#data=' + encoded;
-  document.getElementById('enlace').value = url;
-}
+function initMap(){
+  map = L.map("map").setView([-12.045,-76.870123],15);
+  sat.addTo(map);
+  layer = L.layerGroup().addTo(map);
 
-function cargarDesdeURL() {
-  if (!location.hash.startsWith('#data=')) return;
-  try {
-    const raw = decodeURIComponent(escape(atob(location.hash.replace('#data=',''))));
-    const data = JSON.parse(raw);
-    [1,2].forEach(n => {
-      const v = data[`v${n}`];
-      if (!v) return;
-      document.getElementById(`v${n}_activa`).checked = !!v.activa;
-      document.getElementById(`v${n}_nombre`).value = v.nombre || `Voladura ${n}`;
-      document.getElementById(`v${n}_lat`).value = v.lat;
-      document.getElementById(`v${n}_lng`).value = v.lng;
-      document.getElementById(`v${n}_fecha`).value = v.fecha || hoyISO();
-      document.getElementById(`v${n}_hora`).value = v.hora || '12:00';
-      document.getElementById(`v${n}_ang`).value = v.ang || 0;
-    });
-  } catch(e) {
-    console.error('No se pudo leer la configuración del enlace.', e);
+  map.on("mousemove", e => {
+    const lat = document.getElementById("latInfo");
+    const lng = document.getElementById("lngInfo");
+    if(lat) lat.textContent = e.latlng.lat.toFixed(6);
+    if(lng) lng.textContent = e.latlng.lng.toFixed(6);
+  });
+
+  const satBtn = document.getElementById("satBtn");
+  const mapBtn = document.getElementById("mapBtn");
+  if(satBtn && mapBtn){
+    satBtn.onclick=()=>{map.removeLayer(osm);sat.addTo(map);satBtn.classList.add("active");mapBtn.classList.remove("active")};
+    mapBtn.onclick=()=>{map.removeLayer(sat);osm.addTo(map);mapBtn.classList.add("active");satBtn.classList.remove("active")};
   }
 }
 
-function puntoEnPoligono(point, vs) {
+function iniciarAdmin(){ initMap(); draw(dataFromInputs()); }
+function iniciarUsuario(){ initMap(); draw(dataFromHash()); }
+function actualizar(){ draw(dataFromInputs()); }
+
+function generarEnlace(){
+  const data = dataFromInputs();
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const base = location.href.replace("admin.html","usuario.html").split("#")[0];
+  document.getElementById("shareLink").value = base + "#data=" + encoded;
+}
+
+function pointInPolygon(point, vs){
   const x = point[1], y = point[0];
   let inside = false;
-  for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-    const xi = vs[i][1], yi = vs[i][0];
-    const xj = vs[j][1], yj = vs[j][0];
-    const intersect = ((yi > y) !== (yj > y)) &&
-      (x < (xj - xi) * (y - yi) / ((yj - yi) || 0.0000001) + xi);
-    if (intersect) inside = !inside;
+  for(let i=0,j=vs.length-1;i<vs.length;j=i++){
+    const xi=vs[i][1], yi=vs[i][0];
+    const xj=vs[j][1], yj=vs[j][0];
+    const intersect = ((yi>y)!=(yj>y)) && (x < (xj-xi)*(y-yi)/((yj-yi)||1e-12)+xi);
+    if(intersect) inside = !inside;
   }
   return inside;
 }
 
-function validarUbicacion(lat, lng) {
-  let dentro = [];
-  poligonos.forEach(p => {
-    if (puntoEnPoligono([lat,lng], p.puntos)) dentro.push(`${p.nombre} - ${p.tipo}`);
-  });
-  const estado = document.getElementById('estado');
-  if (dentro.length) {
-    estado.className = 'estado dentro';
-    estado.textContent = 'ALERTA: Usted se encuentra DENTRO del radio de voladura: ' + dentro.join(', ');
-  } else {
-    estado.className = 'estado fuera';
-    estado.textContent = 'Usted se encuentra FUERA del radio de voladura configurado.';
-  }
-}
-
-function activarGPS() {
-  if (!navigator.geolocation) {
-    alert('El navegador no soporta GPS.');
+function activarGPS(){
+  const status = document.getElementById("estadoGPS");
+  if(!navigator.geolocation){
+    status.className="gps danger"; status.textContent="El navegador no soporta GPS.";
     return;
   }
-  navigator.geolocation.watchPosition(pos => {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-    const acc = pos.coords.accuracy || 0;
+  navigator.geolocation.watchPosition(pos=>{
+    const lat=pos.coords.latitude, lng=pos.coords.longitude;
+    if(!gpsMarker) gpsMarker=L.marker([lat,lng]).addTo(layer).bindPopup("Mi ubicación");
+    else gpsMarker.setLatLng([lat,lng]);
 
-    if (!gpsMarker) {
-      gpsMarker = L.marker([lat,lng]).addTo(map).bindPopup('Mi ubicación');
-      gpsCircle = L.circle([lat,lng], {radius: acc}).addTo(map);
-    } else {
-      gpsMarker.setLatLng([lat,lng]);
-      gpsCircle.setLatLng([lat,lng]);
-      gpsCircle.setRadius(acc);
-    }
-    validarUbicacion(lat,lng);
-  }, err => {
-    alert('No se pudo obtener GPS: ' + err.message);
-  }, {enableHighAccuracy:true, maximumAge:5000, timeout:15000});
+    let red=false, green=false;
+    currentPolygons.forEach(poly=>{
+      if(pointInPolygon([lat,lng], poly.points)){
+        if(poly.type==="red") red=true;
+        if(poly.type==="green") green=true;
+      }
+    });
+
+    if(red){ status.className="gps danger"; status.textContent="ALERTA: Usted está dentro del sector rojo de riesgo."; }
+    else if(green){ status.className="gps warn"; status.textContent="Atención: Usted está dentro del radio verde de evacuación."; }
+    else { status.className="gps safe"; status.textContent="Usted está fuera del radio de voladura."; }
+  }, err=>{
+    status.className="gps danger"; status.textContent="No se pudo activar GPS: "+err.message;
+  }, {enableHighAccuracy:true, maximumAge:5000});
 }
-
-cargarDesdeURL();
-actualizar();

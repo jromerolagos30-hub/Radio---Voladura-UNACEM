@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Usuario | Radio de Voladura V20</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body class="user-body">
+  <header class="topbar">
+    <div class="brand"><span class="logo">U</span><b>UNACEM</b><small>CONSULTA RADIO DE VOLADURA</small></div>
+  </header>
+  <main class="user-wrap">
+    <section class="user-card">
+      <h1>Validación de ubicación</h1>
+      <p>Active el GPS para confirmar si se encuentra fuera del radio de voladura.</p>
+      <div id="estadoGPS" class="gps neutral">GPS pendiente de activación.</div>
+      <button class="btn primary" onclick="activarGPS()">Activar GPS</button>
+    </section>
+
+    <section class="map-card user-map">
+      <div id="map"></div>
+    </section>
+
+    <section class="user-card legend-flex">
+      <p><i class="dot red"></i> Sector de riesgo para equipos</p>
+      <p><i class="dot green"></i> Radio de evacuación de personal</p>
+      <p><i class="dot blue"></i> Centro / ubicación</p>
+      <p><i class="line dark"></i> Dirección de perforación</p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./app.js"></script>
+  <script>iniciarUsuario();</script>
+</body>
+</html>

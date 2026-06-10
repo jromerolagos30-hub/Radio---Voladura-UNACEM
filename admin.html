@@ -1,79 +1,76 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>UNACEM | Administrador de Voladura V18</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="style.css"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Administrador | Radio de Voladura V20</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="./styles.css"/>
 </head>
-<body data-mode="admin">
-<div class="app-shell">
-<aside class="sidebar">
-  <div class="brand"><img src="logo-unacem.png" alt="UNACEM" class="logo-unacem"></div>
-  <div class="side-title">RADIO DE VOLADURA</div>
-  <div class="side-subtitle">Sistema de Control de Exclusión</div>
-  <div class="side-footer">Administrador · V18</div>
-</aside>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand side"><span class="logo">U</span><div><b>UNACEM</b><small>RADIO DE VOLADURA</small></div></div>
+      <a class="active">Voladuras</a>
+      <a href="./usuario.html">Vista usuario</a>
+      <a href="./index.html">Inicio</a>
+      <div class="legend">
+        <h3>Leyenda</h3>
+        <p><i class="dot red"></i> Sector de riesgo para equipos</p>
+        <p><i class="dot green"></i> Radio de evacuación de personal</p>
+        <p><i class="dot blue"></i> Centro de voladura</p>
+        <p><i class="line"></i> Dirección de línea de perforación</p>
+      </div>
+    </aside>
 
-<main class="content">
-<section class="topbar">
-  <h1>Administrador de Radio de Voladura</h1>
-  <p>Registra hasta 2 voladuras por día. Cada voladura tiene coordenadas y ángulo de rotación propio.</p>
-</section>
+    <main class="workspace">
+      <header class="pagebar">
+        <h1>Mapa de radios de voladura</h1>
+        <div>
+          <button id="satBtn" class="tab active">Vista Satelital</button>
+          <button id="mapBtn" class="tab">Vista Mapa</button>
+        </div>
+      </header>
 
-<section class="card">
-  <h2>1. Datos generales</h2>
-  <div class="form-grid">
-    <label>Nombre del evento<input id="eventName" type="text" value="Voladuras Atocongo"></label>
-    <label>Zona UTM<input id="zone" type="number" value="18"></label>
-    <label>Hemisferio<select id="hemisphere"><option value="S" selected>Sur</option><option value="N">Norte</option></select></label>
-    <label>Fecha<input id="date" type="date"></label>
-    <label>Hora<input id="time" type="time" value="12:45"></label>
+      <section class="admin-grid">
+        <div class="map-card">
+          <div id="map"></div>
+          <div class="coords">Lat: <b id="latInfo">-</b> &nbsp;&nbsp; Lng: <b id="lngInfo">-</b></div>
+        </div>
+
+        <aside class="panel">
+          <h2>Voladuras del día</h2>
+
+          <div class="blast-card">
+            <div class="title-row"><h3>Voladura 1</h3><span>ACTIVA</span></div>
+            <label>Centro latitud <input id="v1_lat" type="number" step="0.000001" value="-12.043567"></label>
+            <label>Centro longitud <input id="v1_lng" type="number" step="0.000001" value="-76.870123"></label>
+            <label>Ángulo de giro <input id="v1_ang" type="number" value="15"></label>
+            <label>Radio personas (m) <input id="v1_rp" type="number" value="150"></label>
+            <label>Radio equipos (m) <input id="v1_re" type="number" value="300"></label>
+            <label>Estado <select id="v1_estado"><option>Programada</option><option>Ejecutada</option><option>Suspendida</option></select></label>
+          </div>
+
+          <div class="blast-card">
+            <div class="title-row"><h3>Voladura 2</h3><span>ACTIVA</span></div>
+            <label>Centro latitud <input id="v2_lat" type="number" step="0.000001" value="-12.048000"></label>
+            <label>Centro longitud <input id="v2_lng" type="number" step="0.000001" value="-76.870123"></label>
+            <label>Ángulo de giro <input id="v2_ang" type="number" value="195"></label>
+            <label>Radio personas (m) <input id="v2_rp" type="number" value="150"></label>
+            <label>Radio equipos (m) <input id="v2_re" type="number" value="300"></label>
+            <label>Estado <select id="v2_estado"><option>Programada</option><option>Ejecutada</option><option>Suspendida</option></select></label>
+          </div>
+
+          <button class="btn primary full" onclick="actualizar()">Actualizar radios</button>
+          <button class="btn secondary full" onclick="generarEnlace()">Generar enlace usuario</button>
+          <textarea id="shareLink" readonly placeholder="Enlace para compartir"></textarea>
+        </aside>
+      </section>
+    </main>
   </div>
-</section>
 
-<section class="card blast-card">
-  <h2>2. Primera voladura</h2>
-  <div class="form-grid">
-    <label>Activar<select id="v1Enabled"><option value="true" selected>Sí</option><option value="false">No</option></select></label>
-    <label>Nombre<input id="v1Name" type="text" value="Primera voladura"></label>
-    <label>Este UTM X<input id="v1UtmX" type="number" step="0.001" value="292925.533"></label>
-    <label>Norte UTM Y<input id="v1UtmY" type="number" step="0.001" value="8651156.600"></label>
-    <label>Ángulo de rotación horario (°)<input id="v1Angle" type="number" step="0.1" value="0"></label>
-  </div>
-</section>
-
-<section class="card blast-card">
-  <h2>3. Segunda voladura</h2>
-  <div class="form-grid">
-    <label>Activar<select id="v2Enabled"><option value="false" selected>No</option><option value="true">Sí</option></select></label>
-    <label>Nombre<input id="v2Name" type="text" value="Segunda voladura"></label>
-    <label>Este UTM X<input id="v2UtmX" type="number" step="0.001" value="292925.533"></label>
-    <label>Norte UTM Y<input id="v2UtmY" type="number" step="0.001" value="8651156.600"></label>
-    <label>Ángulo de rotación horario (°)<input id="v2Angle" type="number" step="0.1" value="180"></label>
-  </div>
-</section>
-
-<section class="card">
-  <h2>4. Enlace para usuarios</h2>
-  <div class="actions">
-    <button id="btnPreview" class="btn secondary">Previsualizar radios</button>
-    <button id="btnGenerate" class="btn primary">Generar enlace</button>
-  </div>
-  <textarea id="publicLink" readonly placeholder="Aquí aparecerá el enlace generado"></textarea>
-  <button id="btnCopy" class="btn secondary">Copiar enlace</button>
-  <p class="hint">Plantilla geométrica V18: rojo = sector de riesgo para equipos; verde = radio de evacuación de personal.</p>
-</section>
-
-<section class="card map-section">
-  <h2>Previsualización de radios</h2>
-  <div id="map"></div>
-  <p class="legend"><span class="dot red"></span>Sector de riesgo para equipos &nbsp; <span class="dot green"></span>Radio de evacuación de personal</p>
-</section>
-</main>
-</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="script.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./app.js"></script>
+  <script>iniciarAdmin();</script>
 </body>
 </html>
